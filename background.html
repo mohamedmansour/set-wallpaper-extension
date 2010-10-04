@@ -1,0 +1,21 @@
+<!DOCTYPE html> 
+<script>
+/**
+ * Callback when the context menu was clicked.
+ *
+ * @param {Object} info The context menu info.
+ * @param {Object<Tab>} tab The tab that it was triggered.
+ */
+function onImage(info, tab) {
+  var url = 'preview.html#' + info.srcUrl;
+  var index = tab.index + 1;
+  chrome.tabs.create({url: url, index: index});
+}
+
+// Install context menus on images.
+chrome.contextMenus.create({
+  title: 'Set image as wallpaper',
+  contexts: ['image'],
+  onclick: onImage
+});
+</script>

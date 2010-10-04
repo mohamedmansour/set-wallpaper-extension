@@ -1,0 +1,15 @@
+{
+	"name": "TESTING - Set image as wallpaper",
+	"version": "0.0.1",
+	"description": "Set image as wallpaper in Windows. You can stretch, tile, and center.",
+  "icons": {
+    "16": "img/icon16.png",
+    "48": "img/icon48.png",
+    "64": "img/icon64.png"
+  },
+	"plugins": [ 
+    { "path": "setbackground_plugin.dll", "public": true }
+	],
+  "background_page": "background.html",
+	"permissions": ["contextMenus"]
+}
