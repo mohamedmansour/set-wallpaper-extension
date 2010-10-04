@@ -5,9 +5,11 @@
 #ifndef DESKTOP_SERVICE_H_
 #define DESKTOP_SERVICE_H_
 
+#include <iostream>
 #include <npapi.h>
 #include <npruntime.h>
 #include <npfunctions.h>
+#include <string>
 
 namespace desktop_service {
 
@@ -46,7 +48,7 @@ class DesktopService {
 
   // Convert the image located in |path| to JPEG and once its completed
   // successfuly, |path| will be pointed to the new image location.
-  bool ConvertToJPEG(char** path);
+  bool ConvertToJPEG(std::string* path);
 };
 
 }  // namespace desktop_service

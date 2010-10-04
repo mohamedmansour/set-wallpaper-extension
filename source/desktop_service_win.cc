@@ -14,8 +14,8 @@
 
 using desktop_service::ScriptingBridge;
 
-using namespace std;
 using namespace Gdiplus;
+using namespace std;
 
 namespace desktop_service {
 DesktopService::DesktopService(NPP npp, NPNetscapeFuncs* npfuncs)
@@ -58,12 +58,14 @@ bool DesktopService::GetTileStyle(NPVariant* result) {
 }
 
 bool DesktopService::SetWallpaper(NPVariant* result,
-                                  NPString path,
+                                  NPString image_url_char,
                                   int32_t styleInt,
                                   int32_t tileInt) {
+  string image_url(image_url_char.UTF8Characters);
+
   // Lets check if its a valid file extension that the Bitmap encoder can
   // understand.
-  LPCTSTR file_extension = PathFindExtension(path.UTF8Characters);
+  LPCTSTR file_extension = PathFindExtension(image_url.c_str());
   if (lstrcmpi(file_extension, ".bmp") != 0 &&
       lstrcmpi(file_extension, ".gif") != 0 &&
       lstrcmpi(file_extension, ".exif") != 0 &&
@@ -76,17 +78,19 @@ bool DesktopService::SetWallpaper(NPVariant* result,
     return false;
   }
 
-  const uint len = path.UTF8Length;
-  char* pathChar = (char*)npfuncs_->memalloc(len + 1);
-  HRESULT hr = URLDownloadToCacheFile(NULL, path.UTF8Characters,
-                                      pathChar, URLOSTRM_GETNEWESTVERSION,
+  char *cache_temp_path = (char *)npfuncs_->memalloc(MAX_PATH);
+  HRESULT hr = URLDownloadToCacheFile(NULL, image_url.c_str(),
+                                      cache_temp_path, URLOSTRM_GETNEWESTVERSION,
                                       0, NULL);
   if (hr == S_OK) {
+    string image_cache_path(cache_temp_path);
+    npfuncs_->memfree(cache_temp_path);
+
     // If the file type isn't jpg and bmp, we need to convert.
     if (lstrcmpi(file_extension, ".jpg") != 0 &&
         lstrcmpi(file_extension, ".bmp") != 0) {
 
-      if (!ConvertToJPEG(&pathChar)) {
+      if (!ConvertToJPEG(&image_cache_path)) {
         npfuncs_->setexception(scriptable_object_, "Cannot convert image.");
         return false;
       }
@@ -94,7 +98,8 @@ bool DesktopService::SetWallpaper(NPVariant* result,
     
     // Set the registry to apply the wallpaper styles and tiles.
     SetRegistry(tileInt, styleInt);
-    if (SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, pathChar, 
+    if (SystemParametersInfo(SPI_SETDESKWALLPAPER, 0,
+        const_cast<char*>(image_cache_path.c_str()), 
         SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE)) {
       return true;
     }
@@ -102,7 +107,7 @@ bool DesktopService::SetWallpaper(NPVariant* result,
       int error = GetLastError();
       char errorString[1024];
       sprintf(errorString, "Cannot set wallpaper. Code:  %d Path: %s",
-              error, pathChar);
+              error, image_cache_path);
       Debug(errorString);
     }
   }
@@ -187,16 +192,14 @@ int DesktopService::GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
    return -1;  // Failure
 }
 
-bool DesktopService::ConvertToJPEG(char** path) {
+bool DesktopService::ConvertToJPEG(string* path) {
   // Append jpg to the file for saving. (preserve space for extra chars)
-  size_t path_len = strlen(*path);
-  char* renamedChar = (char*)npfuncs_->memalloc(path_len + 5);
-  strcpy(renamedChar, *path);
-  strcat(renamedChar, ".jpg");
+  string renamed_image_path(*path);
+  renamed_image_path.append(".jpg");
 
   // Create the file stream to write on.
   IStream* stream;
-  HRESULT hr = SHCreateStreamOnFile(renamedChar,
+  HRESULT hr = SHCreateStreamOnFile(renamed_image_path.c_str(),
       STGM_READWRITE|STGM_CREATE|STGM_SHARE_EXCLUSIVE, &stream);
 
   // Startup GDI+
@@ -210,27 +213,32 @@ bool DesktopService::ConvertToJPEG(char** path) {
   GetEncoderClsid(L"image/jpeg", &jpgClsid);
 
   // Save the file to the stream.
-  bool success = true;
-  WCHAR* tempPath = (WCHAR*)npfuncs_->memalloc(path_len + 1);
-  MultiByteToWideChar(0, 0, *path, -1, tempPath, path_len + 1);
-  Bitmap* bitmap = new Bitmap(tempPath);
+  int len;
+  int slength = (int)(*path).length() + 1;
+  len = MultiByteToWideChar(0, 0, (*path).c_str(), slength, 0, 0);
+  wchar_t* buf = new wchar_t[len];
+  MultiByteToWideChar(0, 0, (*path).c_str(), slength, buf, len);
+
+  Bitmap* bitmap = new Bitmap(buf);
   stat = bitmap->Save(stream, &jpgClsid, NULL);
+
+  bool success = true;
   if (stat != Ok) {
     int error = GetLastError();
     char errorString[1024];
     sprintf(errorString, "Cannot save image. Code: %d|%d Path: %s",
-            stat, error, path);
+            stat, error, *path);
     Debug(errorString);
     success = false;
   }
   else {
-    *path = renamedChar;
+    *path = renamed_image_path;
   }
 
   // Cleanup.
   GdiplusShutdown(gdiplusToken);
   stream->Release();
-  
+  delete[] buf;
   return success;
 }
 
