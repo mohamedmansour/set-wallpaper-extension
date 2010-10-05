@@ -1,4 +1,4 @@
-LIBRARY   setbackground_plugin.dll
+LIBRARY   setwallpaper_plugin.dll
 
 EXPORTS
 	NP_GetEntryPoints     @1

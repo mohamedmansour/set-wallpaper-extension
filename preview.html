@@ -14,9 +14,12 @@
     </div>
     <div id="options">
       <ul>
-        <li onClick="changeSelection(this, PositionEnum.STRETCH);" class="selected" id="stretchButton">Stretch</li>
-        <li onClick="changeSelection(this, PositionEnum.TILE);" id="tileButton">Tile</li>
-        <li onClick="changeSelection(this, PositionEnum.CENTER);" id="centerButton">Center</li>
+        <li onClick="changeSelection(this, PositionEnum.STRETCH);"
+            class="selected" id="stretchButton">Stretch</li>
+        <li onClick="changeSelection(this, PositionEnum.TILE);"
+            id="tileButton">Tile</li>
+        <li onClick="changeSelection(this, PositionEnum.CENTER);"
+            id="centerButton">Center</li>
       </ul>
     </div>
   </div>
@@ -24,7 +27,8 @@
     <a class="green button" onclick="doSubmit();">Set wallpaper</a>
     <a class="yellow button" onclick="doClose();">Close</a>
   </div>
-  <embed type="application/x-vnd-set-background" id="pluginobj" width="0" height="0" />
+  <embed type="application/x-vnd-set-wallpaper" id="pluginobj"
+         width="0" height="0" />
   <script>
   // Initialize the plugin.
   var app = document.getElementById("pluginobj");

@@ -4,6 +4,7 @@
 
 #ifndef DESKTOP_SERVICE_H_
 #define DESKTOP_SERVICE_H_
+#pragma once
 
 #include <iostream>
 #include <npapi.h>
@@ -15,22 +16,19 @@ namespace desktop_service {
 
 class DesktopService {
  public:
-  explicit DesktopService(NPP npp, NPNetscapeFuncs* npfuncs);
+  DesktopService(NPP npp, NPNetscapeFuncs* npfuncs);
   ~DesktopService();
 
   NPObject* GetScriptableObject();
 
   bool GetSystemColor(NPVariant* result);
   bool GetTileStyle(NPVariant* result);
-  bool SetWallpaper(NPVariant* result, NPString path, int32_t style, int32_t tile);
-  void Debug(char* message);
+  bool SetWallpaper(NPVariant* result, NPString path, int32_t style,
+                    int32_t tile);
+  void Debug(const std::string& message);
 
  private:
-  NPP npp_;
-  NPObject* scriptable_object_;
-  NPNetscapeFuncs* npfuncs_;
-
-  // Sets the registry for the tiles and wallpaper styles.
+  // Sets the registry for the wallpaper styles.
   // http://technet.microsoft.com/en-us/library/cc978626.aspx
   // WallpaperStyle:
   //   0 - Center the bitmap on the desktop.
@@ -40,15 +38,21 @@ class DesktopService {
   // TileWallpaper:
   //   0 - Wallpaper is centered on the screen.
   //   1 - Wallpaper is tiled across the screen.
-  void SetRegistry(int tileInt, int styleInt);
+  void SetWallpaperStyle(int tile, int style);
 
   // Get the requested image encoder class ID used for encoding from the given
   // |format| the result will be set to |pClsid|.
+  // http://msdn.microsoft.com/en-us/library/ms533843(VS.85).aspx
   int GetEncoderClsid(const WCHAR* format, CLSID* pClsid);
 
   // Convert the image located in |path| to JPEG and once its completed
   // successfuly, |path| will be pointed to the new image location.
-  bool ConvertToJPEG(std::string* path);
+  std::wstring ConvertToJPEG(const std::wstring& path);
+
+  NPP npp_;
+  NPObject* scriptable_object_;
+  NPNetscapeFuncs* npfuncs_;
+  ULONG_PTR gdiplus_token_;
 };
 
 }  // namespace desktop_service

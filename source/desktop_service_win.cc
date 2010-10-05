@@ -6,124 +6,163 @@
 
 #include <windows.h>
 #include <gdiplus.h>
-#include <prtypes.h>
 #include <shlwapi.h>
 #include <urlmon.h>
 
 #include "scripting_bridge.h"
+#include "string_utils.h"
 
 using desktop_service::ScriptingBridge;
 
 using namespace Gdiplus;
-using namespace std;
+using namespace string_utils;
 
 namespace desktop_service {
 DesktopService::DesktopService(NPP npp, NPNetscapeFuncs* npfuncs)
     : npp_(npp),
       scriptable_object_(NULL),
-      npfuncs_(npfuncs) {
+      npfuncs_(npfuncs),
+      gdiplus_token_(NULL) {
   ScriptingBridge::InitializeIdentifiers(npfuncs);
+  GdiplusStartupInput gdiplus_startup_input;
+  GdiplusStartup(&gdiplus_token_, &gdiplus_startup_input, NULL);
 }
 
 DesktopService::~DesktopService() {
-  if (scriptable_object_) {
+  GdiplusShutdown(gdiplus_token_);
+  if (scriptable_object_)
     npfuncs_->releaseobject(scriptable_object_);
-  }
 }
 
 NPObject* DesktopService::GetScriptableObject() {
   if (scriptable_object_ == NULL) {
     scriptable_object_ =
-      npfuncs_->createobject(npp_, &ScriptingBridge::np_class);
+        npfuncs_->createobject(npp_, &ScriptingBridge::np_class);
   }
-  if (scriptable_object_) {
+  if (scriptable_object_)
     npfuncs_->retainobject(scriptable_object_);
-  }
   return scriptable_object_;
 }
 
 bool DesktopService::GetSystemColor(NPVariant* result) {
-  char* hexColor = (char *)npfuncs_->memalloc(7);
+  Debug("Trying to get system color.");
+  char* hex_color = (char*)npfuncs_->memalloc(7);
   DWORD color = GetSysColor(1);
-  sprintf(hexColor, "%02X%02X%02X", GetRValue(color), GetGValue(color),
+  sprintf(hex_color, "%02X%02X%02X", GetRValue(color), GetGValue(color),
           GetBValue(color));
   result->type = NPVariantType_String;
-  result->value.stringValue.UTF8Characters = hexColor;
+  result->value.stringValue.UTF8Characters = hex_color;
   result->value.stringValue.UTF8Length = 6;
+  Debug(std::string("System color found: ").append(hex_color));
   return true;
 }
 
 bool DesktopService::GetTileStyle(NPVariant* result) {
+  Debug("Getting wallpaper tile style.");
   return true;
 }
 
 bool DesktopService::SetWallpaper(NPVariant* result,
                                   NPString image_url_char,
-                                  int32_t styleInt,
-                                  int32_t tileInt) {
-  string image_url(image_url_char.UTF8Characters);
+                                  int32_t style,
+                                  int32_t tile) {
+  Debug(std::string("Trying to set wallpaper for ").
+      append(image_url_char.UTF8Characters));
+  std::wstring image_url(SysUTF8ToWide(image_url_char.UTF8Characters));
 
   // Lets check if its a valid file extension that the Bitmap encoder can
   // understand.
-  LPCTSTR file_extension = PathFindExtension(image_url.c_str());
-  if (lstrcmpi(file_extension, ".bmp") != 0 &&
-      lstrcmpi(file_extension, ".gif") != 0 &&
-      lstrcmpi(file_extension, ".exif") != 0 &&
-      lstrcmpi(file_extension, ".jpg") != 0 &&
-      lstrcmpi(file_extension, ".jpeg") != 0 &&
-      lstrcmpi(file_extension, ".png") != 0 &&
-      lstrcmpi(file_extension, ".tiff") != 0) {
+  std::wstring file_extension = PathFindExtension(image_url.c_str());
+  if (file_extension.compare(L".bmp") != 0 &&
+      file_extension.compare(L".gif") != 0 &&
+      file_extension.compare(L".exif") != 0 &&
+      file_extension.compare(L".jpg") != 0 &&
+      file_extension.compare(L".jpeg") != 0 &&
+      file_extension.compare(L".png") != 0 &&
+      file_extension.compare(L".tiff") != 0) {
     Debug("Image format not accepted.");
     npfuncs_->setexception(scriptable_object_, "Image format not accepted.");
     return false;
   }
 
-  char *cache_temp_path = (char *)npfuncs_->memalloc(MAX_PATH);
+  wchar_t* cache_temp_path = (wchar_t*) npfuncs_->memalloc(MAX_PATH);
   HRESULT hr = URLDownloadToCacheFile(NULL, image_url.c_str(),
-                                      cache_temp_path, URLOSTRM_GETNEWESTVERSION,
+                                      cache_temp_path, MAX_PATH,
                                       0, NULL);
-  if (hr == S_OK) {
-    string image_cache_path(cache_temp_path);
-    npfuncs_->memfree(cache_temp_path);
-
-    // If the file type isn't jpg and bmp, we need to convert.
-    if (lstrcmpi(file_extension, ".jpg") != 0 &&
-        lstrcmpi(file_extension, ".bmp") != 0) {
-
-      if (!ConvertToJPEG(&image_cache_path)) {
-        npfuncs_->setexception(scriptable_object_, "Cannot convert image.");
-        return false;
-      }
-    }
-    
-    // Set the registry to apply the wallpaper styles and tiles.
-    SetRegistry(tileInt, styleInt);
-    if (SystemParametersInfo(SPI_SETDESKWALLPAPER, 0,
-        const_cast<char*>(image_cache_path.c_str()), 
-        SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE)) {
-      return true;
-    }
-    else {
-      int error = GetLastError();
-      char errorString[1024];
-      sprintf(errorString, "Cannot set wallpaper. Code:  %d Path: %s",
-              error, image_cache_path);
-      Debug(errorString);
-    }
+  if (FAILED(hr)) {
+    Debug("Image cannot download.");
+    npfuncs_->setexception(scriptable_object_, "Image cannot download.");
+    return false;
   }
+
+  Debug("Image has downloaded successfully.");
+  std::wstring image_cache_path(cache_temp_path);
+  npfuncs_->memfree(cache_temp_path);
+
+  // If the file type isn't jpg or bmp, we need to convert.
+  if (file_extension.compare(L".jpg") != 0 &&
+      file_extension.compare(L".bmp") != 0) {
+    std::wstring new_image_cache_path = ConvertToJPEG(image_cache_path);
+    if (new_image_cache_path.empty()) {
+      npfuncs_->setexception(scriptable_object_, "Cannot convert image.");
+      return false;
+    }
+
+    // Refer to the new path since that is where our encoded image might be.
+    image_cache_path = new_image_cache_path;
+    Debug(std::string("Image converted successfully to ").
+        append(SysWideToUTF8(new_image_cache_path)));
+  }
+  
+  SetWallpaperStyle(tile, style);
+
+  Debug("Trying to set wallpaper style.");
+  if (SystemParametersInfo(SPI_SETDESKWALLPAPER, 0,
+      const_cast<wchar_t*>(image_cache_path.c_str()), 
+      SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE)) {
+    Debug("Wallpaper set successfully.");
+    return true;
+  }
+  int error = GetLastError();
+  char* error_str = new char[1024];
+  sprintf(error_str, "Cannot set wallpaper. Code: %d Path: %s",
+           error, image_cache_path.c_str());
+  Debug(error_str);
+  delete[] error_str; 
+  error_str = NULL;
   npfuncs_->setexception(scriptable_object_, "Cannot set wallpaper.");
   return false;
 }
 
-void DesktopService::Debug(char* message) {
+void DesktopService::Debug(const std::string& message) {
   // Get window object.
   NPObject* window = NULL;
   npfuncs_->getvalue(npp_, NPNVWindowNPObject, &window);
 
+  // Get chrome object.
+  NPVariant chromeVar;
+  NPIdentifier id = npfuncs_->getstringidentifier("chrome");
+  npfuncs_->utf8fromidentifier(id);
+  npfuncs_->getproperty(npp_, window, id, &chromeVar);
+  NPObject* chrome = NPVARIANT_TO_OBJECT(chromeVar);
+
+  // Get extension object.
+  NPVariant extensionVar;
+  id = npfuncs_->getstringidentifier("extension");
+  npfuncs_->getproperty(npp_, chrome, id, &extensionVar);
+  NPObject* extension = NPVARIANT_TO_OBJECT(extensionVar);
+
+  // Get the getBackground object.
+  NPVariant backgroundVar;
+  id = npfuncs_->getstringidentifier("getBackgroundPage");
+  NPVariant backgroundResponse;
+  npfuncs_->invoke(npp_, extension, id, NULL, 0, &backgroundResponse);
+  NPObject* background = NPVARIANT_TO_OBJECT(backgroundResponse);
+
   // Get console object.
   NPVariant consoleVar;
-  NPIdentifier id = npfuncs_->getstringidentifier("console");
-  npfuncs_->getproperty(npp_, window, id, &consoleVar);
+  id = npfuncs_->getstringidentifier("console");
+  npfuncs_->getproperty(npp_, background, id, &consoleVar);
   NPObject* console = NPVARIANT_TO_OBJECT(consoleVar);
 
   // Get the debug object.
@@ -132,114 +171,116 @@ void DesktopService::Debug(char* message) {
 
   // Invoke the call with the message!
   NPVariant type;
-  STRINGZ_TO_NPVARIANT(message, type);
+  STRINGZ_TO_NPVARIANT(message.c_str(), type);
   NPVariant args[] = { type };
   NPVariant voidResponse;
-  npfuncs_->invoke(npp_, console, id, args, sizeof(args) / sizeof(args[0]), &voidResponse);
+  npfuncs_->invoke(npp_, console, id, args,
+                   sizeof(args) / sizeof(args[0]),
+                   &voidResponse);
 
   // Cleanup all allocated objects, otherwise, reference count and
   // memory leaks will happen.
   npfuncs_->releaseobject(window);
+  npfuncs_->releasevariantvalue(&chromeVar);
+  npfuncs_->releasevariantvalue(&backgroundVar);
   npfuncs_->releasevariantvalue(&consoleVar);
   npfuncs_->releasevariantvalue(&debugVar);
 }
 
-void DesktopService::SetRegistry(int tileInt, int styleInt) {
-  char   subKey[] = "Control Panel\\Desktop";
-  PRBool result = PR_FALSE;
-  DWORD  dwDisp = 0;
-  HKEY   key;
-  // Try to create/open a subkey under HKLM.
-  DWORD rc = RegCreateKeyEx(HKEY_CURRENT_USER, subKey, 0, NULL,
-      REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &key, &dwDisp );
+void DesktopService::SetWallpaperStyle(int tile, int style) {
+  wchar_t sub_key[] = L"Control Panel\\Desktop";
+  DWORD dw_disp = 0;
+  HKEY key;
+
+  // Clamp the inputs to be from 0 to 2.
+  tile = tile < 0 ? 2 : (tile > 2 ? 2 : tile);
+  style = style < 0 ? 2 : (style > 2 ? 2 : style);
+
+  // Try to create / open a subkey under HKCU for TileWallpaper and
+  // WallpaperStyle.
+  DWORD rc = RegCreateKeyEx(HKEY_CURRENT_USER, sub_key, 0, NULL,
+      REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &key, &dw_disp );
   if (rc == ERROR_SUCCESS) {
-    unsigned char tile[2];
-    unsigned char style[2];
-    tile[0] = tileInt + '0';
-    style[0] = styleInt + '0';
-    tile[1] = '\0';
-    style[1] = '\0';
-    RegSetValueEx(key, "TileWallpaper", 0, REG_SZ, tile, sizeof(tile));
-    RegSetValueEx(key, "WallpaperStyle", 0, REG_SZ, style, sizeof(style));
+    unsigned char t[2];
+    unsigned char s[2];
+    t[0] = '0' + tile;
+    s[0] = '0' + style;
+    t[1] = '\0';
+    s[1] = '\0';
+    RegSetValueEx(key, L"TileWallpaper", 0, REG_SZ, t, sizeof(t));
+    RegSetValueEx(key, L"WallpaperStyle", 0, REG_SZ, s, sizeof(s));
+    RegCloseKey(key);
   }
 }
 
 int DesktopService::GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
-   UINT  num = 0;  // Number of image encoders.
-   UINT  size = 0; // Size of the image encoder array in bytes.
+  UINT  num = 0;  // Number of image encoders.
+  UINT  size = 0; // Size of the image encoder array in bytes.
 
-   ImageCodecInfo* pImageCodecInfo = NULL;
+  ImageCodecInfo* pImageCodecInfo = NULL;
 
-   GetImageEncodersSize(&num, &size);
-   if(size == 0)
-      return -1;  // Failure
+  GetImageEncodersSize(&num, &size);
+  if (size == 0)
+    return -1;  // Failure.
 
-   pImageCodecInfo = (ImageCodecInfo*)(malloc(size));
-   if(pImageCodecInfo == NULL)
-      return -1;  // Failure
+  pImageCodecInfo = (ImageCodecInfo*)(malloc(size));
+  if (pImageCodecInfo == NULL)
+    return -1;  // Failure.
 
-   GetImageEncoders(num, size, pImageCodecInfo);
+  GetImageEncoders(num, size, pImageCodecInfo);
 
-   for(UINT j = 0; j < num; ++j) {
-      if( wcscmp(pImageCodecInfo[j].MimeType, format) == 0 ) {
-         *pClsid = pImageCodecInfo[j].Clsid;
-         free(pImageCodecInfo);
-         return j;  // Success
-      }    
-   }
+  for (UINT j = 0; j < num; ++j) {
+    if (wcscmp(pImageCodecInfo[j].MimeType, format) == 0 ) {
+      *pClsid = pImageCodecInfo[j].Clsid;
+      free(pImageCodecInfo);
+      return j;  // Success.
+    }    
+  }
 
-   free(pImageCodecInfo);
-   return -1;  // Failure
+  free(pImageCodecInfo);
+  return -1;  // Failure.
 }
 
-bool DesktopService::ConvertToJPEG(string* path) {
-  // Append jpg to the file for saving. (preserve space for extra chars)
-  string renamed_image_path(*path);
-  renamed_image_path.append(".jpg");
+std::wstring DesktopService::ConvertToJPEG(const std::wstring& path) {
+  Debug("Image is not a known type, need to convert to JPEG.");
+
+  // Append jpg to the file for saving.
+  std::wstring renamed_image_path(path);
+  renamed_image_path.append(L".jpg");
 
   // Create the file stream to write on.
   IStream* stream;
   HRESULT hr = SHCreateStreamOnFile(renamed_image_path.c_str(),
       STGM_READWRITE|STGM_CREATE|STGM_SHARE_EXCLUSIVE, &stream);
 
-  // Startup GDI+
-  Status stat;
-  GdiplusStartupInput gdiplusStartupInput;
-  ULONG_PTR gdiplusToken;
-  GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-
   // Prepare the JPEG encoder.
   CLSID jpgClsid;
   GetEncoderClsid(L"image/jpeg", &jpgClsid);
 
   // Save the file to the stream.
-  int len;
-  int slength = (int)(*path).length() + 1;
-  len = MultiByteToWideChar(0, 0, (*path).c_str(), slength, 0, 0);
-  wchar_t* buf = new wchar_t[len];
-  MultiByteToWideChar(0, 0, (*path).c_str(), slength, buf, len);
-
-  Bitmap* bitmap = new Bitmap(buf);
+  Bitmap* bitmap = new Bitmap(path.c_str());
+  if (!bitmap) {
+    Debug("Something went wrong while constructing the bitmap.");
+    return std::wstring();
+  }
+  Status stat;
   stat = bitmap->Save(stream, &jpgClsid, NULL);
+  delete bitmap;
+  stream->Release();
 
   bool success = true;
   if (stat != Ok) {
     int error = GetLastError();
-    char errorString[1024];
-    sprintf(errorString, "Cannot save image. Code: %d|%d Path: %s",
-            stat, error, *path);
-    Debug(errorString);
+    char* error_str = new char[1024];
+    sprintf(error_str, "Cannot save image. Code: %d|%d Path: %s",
+            stat, error, path);
+    Debug(error_str);
+    delete[] error_str;
+    error_str = NULL;
     success = false;
   }
-  else {
-    *path = renamed_image_path;
-  }
 
-  // Cleanup.
-  GdiplusShutdown(gdiplusToken);
-  stream->Release();
-  delete[] buf;
-  return success;
+  return success ? renamed_image_path : std::wstring();
 }
 
 }

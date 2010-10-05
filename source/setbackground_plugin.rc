@@ -44,15 +44,14 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "Mohamed Mansour"
-            VALUE "FileDescription", "NPAPI Plugin that sets an image as a background, copyright 2010 <a href=""http://mohamedmansour.com"">Mohamed Mansour</a>"
-            VALUE "FileExtents", "foo"
-            VALUE "FileOpenName", "TESTING - Set Background Plugin"
+            VALUE "FileDescription", "NPAPI Plugin that sets an image as a wallpaper, copyright 2010 <a href=""http://mohamedmansour.com"">Mohamed Mansour</a>"
+            VALUE "FileOpenName", "TESTING - Set Wallpaper Plugin"
             VALUE "FileVersion", "1, 0, 0, 0"
-            VALUE "InternalName", "SetBackgroundPlugin"
+            VALUE "InternalName", "SetWallpaperPlugin"
             VALUE "LegalCopyright", "Copyright 2010 Mohamed Mansour."
-            VALUE "MIMEType", "application/x-vnd-set-background"
-            VALUE "OriginalFilename", "setbackground-plugin.dll"
-            VALUE "ProductName", "TESTING - Set Background Plugin"
+            VALUE "MIMEType", "application/x-vnd-set-wallpaper"
+            VALUE "OriginalFilename", "setwallpaper-plugin.dll"
+            VALUE "ProductName", "TESTING - Set Wallpaper Plugin"
             VALUE "ProductVersion", "1, 0, 0, 0"
         END
     END

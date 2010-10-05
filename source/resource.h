@@ -2,11 +2,6 @@
 // Microsoft Visual C++ generated include file.
 // Used by setbackground_plugin.rc
 //
-#define IDD_MAIN                        101
-#define IDC_BUTTON_GO                   1002
-#define IDC_STATIC_UA                   1003
-#define IDC_BUTTON1                     1005
-#define IDC_BUTTON_DONT                 1005
 
 // Next default values for new objects
 // 

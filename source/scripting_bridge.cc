@@ -34,9 +34,9 @@ bool ScriptingBridge::InitializeIdentifiers(NPNetscapeFuncs* npfuncs) {
 
   method_table =
     new(std::nothrow) std::map<NPIdentifier, MethodSelector>;
-  if (method_table == NULL) {
+  if (method_table == NULL)
     return false;
-  }
+
   method_table->insert(
     std::pair<NPIdentifier, MethodSelector>(id_system_color,
                                             &ScriptingBridge::GetSystemColor));
@@ -54,9 +54,8 @@ bool ScriptingBridge::GetSystemColor(const NPVariant* args,
                                      uint32_t arg_count,
                                      NPVariant* result) {
   DesktopService* desktop_service = static_cast<DesktopService*>(npp_->pdata);
-  if (desktop_service) {
+  if (desktop_service)
     return desktop_service->GetSystemColor(result);
-  }
   return false;
 }
 
@@ -64,9 +63,8 @@ bool ScriptingBridge::GetTileStyle(const NPVariant* args,
                                    uint32_t arg_count,
                                    NPVariant* result) {
   DesktopService* desktop_service = static_cast<DesktopService*>(npp_->pdata);
-  if (desktop_service) {
+  if (desktop_service)
     return desktop_service->GetTileStyle(result);
-  }
   return false;
 }
 
@@ -75,9 +73,8 @@ bool ScriptingBridge::SetWallpaper(const NPVariant* args,
                                    NPVariant* result) {
   // The JavaScript signature must have three arguments, otherwise just fail
   // silently.
-  if (arg_count != 3) {
+  if (arg_count != 3)
     return false;
-  }
 
   const NPVariant pathArgument = args[0];
   const NPVariant styleArgument = args[1];
@@ -95,9 +92,8 @@ bool ScriptingBridge::SetWallpaper(const NPVariant* args,
   const int32_t tile = NPVARIANT_TO_INT32(tileArgument);
 
   DesktopService* desktop_service = static_cast<DesktopService*>(npp_->pdata);
-  if (desktop_service) {
+  if (desktop_service)
     return desktop_service->SetWallpaper(result, path, style, tile);
-  }
   return false;
 }
 

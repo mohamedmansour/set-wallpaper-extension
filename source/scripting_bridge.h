@@ -4,6 +4,7 @@
 
 #ifndef SCRIPTING_BRIDGE_H_
 #define SCRIPTING_BRIDGE_H_
+#pragma once
 
 #include <map>
 
@@ -12,7 +13,7 @@
 
 namespace desktop_service {
   
-// This class that gets exposed to the browser code.
+// The class that gets exposed to the browser code.
 class ScriptingBridge : public NPObject {
  public:
   typedef bool (ScriptingBridge::*MethodSelector)(const NPVariant* args,
@@ -48,11 +49,14 @@ class ScriptingBridge : public NPObject {
   // DesktopService object, which is where the actual implementation lies.
 
   // Gets the system background color.
-  bool GetSystemColor(const NPVariant* args, uint32_t arg_count, NPVariant* result);
+  bool GetSystemColor(const NPVariant* args, uint32_t arg_count,
+                      NPVariant* result);
   // Gets the tile and wallpaper style.
-  bool GetTileStyle(const NPVariant* args, uint32_t arg_count, NPVariant* result);
+  bool GetTileStyle(const NPVariant* args, uint32_t arg_count,
+                    NPVariant* result);
   // Sets the wallpaper.
-  bool SetWallpaper(const NPVariant* args, uint32_t arg_count, NPVariant* result);
+  bool SetWallpaper(const NPVariant* args, uint32_t arg_count,
+                    NPVariant* result);
 
  private:
   NPP npp_;
