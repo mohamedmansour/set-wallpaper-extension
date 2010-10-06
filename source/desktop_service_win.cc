@@ -29,7 +29,8 @@ DesktopService::DesktopService(NPP npp, NPNetscapeFuncs* npfuncs)
 }
 
 DesktopService::~DesktopService() {
-  GdiplusShutdown(gdiplus_token_);
+  if (gdiplus_token_)
+    GdiplusShutdown(gdiplus_token_);
   if (scriptable_object_)
     npfuncs_->releaseobject(scriptable_object_);
 }
@@ -116,7 +117,6 @@ bool DesktopService::SetWallpaper(NPVariant* result,
   
   SetWallpaperStyle(tile, style);
 
-  Debug("Trying to set wallpaper style.");
   if (SystemParametersInfo(SPI_SETDESKWALLPAPER, 0,
       const_cast<wchar_t*>(image_cache_path.c_str()), 
       SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE)) {
@@ -188,13 +188,16 @@ void DesktopService::Debug(const std::string& message) {
 }
 
 void DesktopService::SetWallpaperStyle(int tile, int style) {
+  
+  Debug("Trying to set wallpaper style.");
+
   wchar_t sub_key[] = L"Control Panel\\Desktop";
   DWORD dw_disp = 0;
   HKEY key;
 
   // Clamp the inputs to be from 0 to 2.
-  tile = tile < 0 ? 2 : (tile > 2 ? 2 : tile);
-  style = style < 0 ? 2 : (style > 2 ? 2 : style);
+  //tile = tile < 0 ? 2 : (tile > 2 ? 2 : tile);
+  //style = style < 0 ? 2 : (style > 2 ? 2 : style);
 
   // Try to create / open a subkey under HKCU for TileWallpaper and
   // WallpaperStyle.
@@ -203,13 +206,17 @@ void DesktopService::SetWallpaperStyle(int tile, int style) {
   if (rc == ERROR_SUCCESS) {
     unsigned char t[2];
     unsigned char s[2];
-    t[0] = '0' + tile;
-    s[0] = '0' + style;
+    t[0] = tile + '0';
+    s[0] = style + '0';
     t[1] = '\0';
     s[1] = '\0';
     RegSetValueEx(key, L"TileWallpaper", 0, REG_SZ, t, sizeof(t));
     RegSetValueEx(key, L"WallpaperStyle", 0, REG_SZ, s, sizeof(s));
     RegCloseKey(key);
+    Debug("Wallpaper style set sucessfully.");
+  }
+  else {
+    Debug("Failed to set the wallpaper style.");
   }
 }
 
@@ -244,18 +251,9 @@ int DesktopService::GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
 std::wstring DesktopService::ConvertToJPEG(const std::wstring& path) {
   Debug("Image is not a known type, need to convert to JPEG.");
 
-  // Append jpg to the file for saving.
-  std::wstring renamed_image_path(path);
-  renamed_image_path.append(L".jpg");
-
-  // Create the file stream to write on.
-  IStream* stream;
-  HRESULT hr = SHCreateStreamOnFile(renamed_image_path.c_str(),
-      STGM_READWRITE|STGM_CREATE|STGM_SHARE_EXCLUSIVE, &stream);
-
   // Prepare the JPEG encoder.
-  CLSID jpgClsid;
-  GetEncoderClsid(L"image/jpeg", &jpgClsid);
+  CLSID jpg_clsid;
+  GetEncoderClsid(L"image/jpeg", &jpg_clsid);
 
   // Save the file to the stream.
   Bitmap* bitmap = new Bitmap(path.c_str());
@@ -263,17 +261,19 @@ std::wstring DesktopService::ConvertToJPEG(const std::wstring& path) {
     Debug("Something went wrong while constructing the bitmap.");
     return std::wstring();
   }
-  Status stat;
-  stat = bitmap->Save(stream, &jpgClsid, NULL);
+
+  // Append jpg to the file for saving.
+  std::wstring renamed_image_path(path);
+  renamed_image_path.append(L".jpg");
+  Status stat = bitmap->Save(renamed_image_path.c_str(), &jpg_clsid, NULL);
   delete bitmap;
-  stream->Release();
 
   bool success = true;
   if (stat != Ok) {
     int error = GetLastError();
     char* error_str = new char[1024];
     sprintf(error_str, "Cannot save image. Code: %d|%d Path: %s",
-            stat, error, path);
+      stat, error, path.c_str());
     Debug(error_str);
     delete[] error_str;
     error_str = NULL;
