@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by setbackground_plugin.rc
+// Used by setwallpaper_plugin.rc
 //
 
 // Next default values for new objects

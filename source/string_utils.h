@@ -15,7 +15,8 @@ std::wstring SysUTF8ToWide(const std::string& utf8);
 // code page identifier is one accepted by the Windows function
 // MultiByteToWideChar().
 std::wstring SysMultiByteToWide(const std::string& mb, unsigned int code_page);
-std::string SysWideToMultiByte(const std::wstring& wide, unsigned int code_page);
+std::string SysWideToMultiByte(const std::wstring& wide,
+                               unsigned int code_page);
 
 }  // namespace string_utils
 

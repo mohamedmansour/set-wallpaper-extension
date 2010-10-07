@@ -47,7 +47,7 @@ NPObject* DesktopService::GetScriptableObject() {
 
 bool DesktopService::GetSystemColor(NPVariant* result) {
   Debug("Trying to get system color.");
-  char* hex_color = (char*)npfuncs_->memalloc(7);
+  char* hex_color = (char*) npfuncs_->memalloc(7);
   DWORD color = GetSysColor(1);
   sprintf(hex_color, "%02X%02X%02X", GetRValue(color), GetGValue(color),
           GetBValue(color));
@@ -86,13 +86,15 @@ bool DesktopService::SetWallpaper(NPVariant* result,
     return false;
   }
 
-  wchar_t* cache_temp_path = (wchar_t*) npfuncs_->memalloc(MAX_PATH);
+  wchar_t* cache_temp_path =
+      (wchar_t*) npfuncs_->memalloc(MAX_PATH * sizeof(wchar_t));
   HRESULT hr = URLDownloadToCacheFile(NULL, image_url.c_str(),
                                       cache_temp_path, MAX_PATH,
                                       0, NULL);
   if (FAILED(hr)) {
     Debug("Image cannot download.");
     npfuncs_->setexception(scriptable_object_, "Image cannot download.");
+    npfuncs_->memfree(cache_temp_path);
     return false;
   }
 
@@ -125,8 +127,8 @@ bool DesktopService::SetWallpaper(NPVariant* result,
   }
   int error = GetLastError();
   char* error_str = new char[1024];
-  sprintf(error_str, "Cannot set wallpaper. Code: %d Path: %s",
-           error, image_cache_path.c_str());
+  sprintf(error_str, "Cannot set wallpaper. Code: %d Path: %S",
+          error, image_cache_path.c_str());
   Debug(error_str);
   delete[] error_str; 
   error_str = NULL;
@@ -196,22 +198,24 @@ void DesktopService::SetWallpaperStyle(int tile, int style) {
   HKEY key;
 
   // Clamp the inputs to be from 0 to 2.
-  //tile = tile < 0 ? 2 : (tile > 2 ? 2 : tile);
-  //style = style < 0 ? 2 : (style > 2 ? 2 : style);
+  tile = tile < 0 ? 0 : (tile > 2 ? 2 : tile);
+  style = style < 0 ? 0 : (style > 2 ? 2 : style);
 
   // Try to create / open a subkey under HKCU for TileWallpaper and
   // WallpaperStyle.
   DWORD rc = RegCreateKeyEx(HKEY_CURRENT_USER, sub_key, 0, NULL,
       REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &key, &dw_disp );
   if (rc == ERROR_SUCCESS) {
-    unsigned char t[2];
-    unsigned char s[2];
-    t[0] = tile + '0';
-    s[0] = style + '0';
-    t[1] = '\0';
-    s[1] = '\0';
-    RegSetValueEx(key, L"TileWallpaper", 0, REG_SZ, t, sizeof(t));
-    RegSetValueEx(key, L"WallpaperStyle", 0, REG_SZ, s, sizeof(s));
+    // Since we are dealing with unicode, we need to send unicode values
+    // when we store the registry.
+    wchar_t tile_value[32];
+    wchar_t style_value[32];
+    wsprintf(tile_value, L"%u", tile);
+    wsprintf(style_value, L"%u", style);
+    RegSetValueEx(key, L"TileWallpaper", 0, REG_SZ, (BYTE*) tile_value,
+                  (lstrlen(tile_value) + 1) * sizeof(wchar_t));
+    RegSetValueEx(key, L"WallpaperStyle", 0, REG_SZ, (BYTE*) style_value,
+                  (lstrlen(style_value) + 1) * sizeof(wchar_t));
     RegCloseKey(key);
     Debug("Wallpaper style set sucessfully.");
   }
@@ -272,8 +276,8 @@ std::wstring DesktopService::ConvertToJPEG(const std::wstring& path) {
   if (stat != Ok) {
     int error = GetLastError();
     char* error_str = new char[1024];
-    sprintf(error_str, "Cannot save image. Code: %d|%d Path: %s",
-      stat, error, path.c_str());
+    sprintf(error_str, "Cannot save image. Code: %d|%d Path: %S",
+            stat, error, path.c_str());
     Debug(error_str);
     delete[] error_str;
     error_str = NULL;
