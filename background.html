@@ -34,6 +34,15 @@ function getVersion() {
 }
 
 /**
+ * Sanitize the url to remove all the query string params.
+ * @param {string} url The image url that need sanitization.
+ * @return {string} The cleaned url.
+ */
+function sanitizeURL(url) {
+  return url.split('?')[0];
+}
+
+/**
  * Callback when the context menu was clicked.
  *
  * @param {Object} info The context menu info.
@@ -42,7 +51,7 @@ function getVersion() {
 function onImage(info, tab) {
   var url = 'preview.html#' + info.srcUrl;
   var index = tab.index + 1;
-  chrome.tabs.create({url: url, index: index});
+  chrome.tabs.create({url: sanitizeURL(url), index: index});
 }
 
 
