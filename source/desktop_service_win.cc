@@ -22,7 +22,8 @@ DesktopService::DesktopService(NPP npp, NPNetscapeFuncs* npfuncs)
     : npp_(npp),
       scriptable_object_(NULL),
       npfuncs_(npfuncs),
-      gdiplus_token_(NULL) {
+      gdiplus_token_(NULL),
+      supports_jpeg_wallpaper_(IsJPEGSupported()) {
   ScriptingBridge::InitializeIdentifiers(npfuncs);
   GdiplusStartupInput gdiplus_startup_input;
   GdiplusStartup(&gdiplus_token_, &gdiplus_startup_input, NULL);
@@ -46,7 +47,6 @@ NPObject* DesktopService::GetScriptableObject() {
 }
 
 bool DesktopService::GetSystemColor(NPVariant* result) {
-  Debug("Trying to get system color.");
   char* hex_color = (char*) npfuncs_->memalloc(7);
   DWORD color = GetSysColor(1);
   sprintf(hex_color, "%02X%02X%02X", GetRValue(color), GetGValue(color),
@@ -68,7 +68,7 @@ bool DesktopService::SetWallpaper(NPVariant* result,
                                   int32_t style,
                                   int32_t tile) {
   Debug(std::string("Trying to set wallpaper for ").
-      append(image_url_char.UTF8Characters));
+        append(image_url_char.UTF8Characters));
   std::wstring image_url(SysUTF8ToWide(image_url_char.UTF8Characters));
 
   // Lets check if its a valid file extension that the Bitmap encoder can
@@ -76,24 +76,25 @@ bool DesktopService::SetWallpaper(NPVariant* result,
   std::wstring file_extension = PathFindExtension(image_url.c_str());
   if (file_extension.compare(L".bmp") != 0 &&
       file_extension.compare(L".gif") != 0 &&
-      file_extension.compare(L".exif") != 0 &&
       file_extension.compare(L".jpg") != 0 &&
       file_extension.compare(L".jpeg") != 0 &&
       file_extension.compare(L".png") != 0 &&
+      file_extension.compare(L".tif") != 0 &&
       file_extension.compare(L".tiff") != 0) {
     Debug("Image format not accepted.");
     npfuncs_->setexception(scriptable_object_, "Image format not accepted.");
     return false;
   }
 
+  // Download the image to the cache so we can set it as a wallpaper.
   wchar_t* cache_temp_path =
       (wchar_t*) npfuncs_->memalloc(MAX_PATH * sizeof(wchar_t));
   HRESULT hr = URLDownloadToCacheFile(NULL, image_url.c_str(),
                                       cache_temp_path, MAX_PATH,
                                       0, NULL);
   if (FAILED(hr)) {
-    Debug("Image cannot download.");
-    npfuncs_->setexception(scriptable_object_, "Image cannot download.");
+    Debug("Image cannot be downloaded.");
+    npfuncs_->setexception(scriptable_object_, "Image cannot downloaded.");
     npfuncs_->memfree(cache_temp_path);
     return false;
   }
@@ -102,29 +103,50 @@ bool DesktopService::SetWallpaper(NPVariant* result,
   std::wstring image_cache_path(cache_temp_path);
   npfuncs_->memfree(cache_temp_path);
 
-  // If the file type isn't jpg or bmp, we need to convert.
-  if (file_extension.compare(L".jpg") != 0 &&
-      file_extension.compare(L".bmp") != 0) {
-    std::wstring new_image_cache_path = ConvertToJPEG(image_cache_path);
+  // BMP is a supported wallpaper image type for all windows. So we can skip
+  // the conversion process.
+  if (file_extension.compare(L".bmp") != 0) {
+    std::wstring new_image_cache_path;
+
+    // Check if the operating supports JPEG, if so, we can convert to that type
+    // instead of forcing all conversions to BMP. Only if needed.
+    if (supports_jpeg_wallpaper_) {
+      if (file_extension.compare(L".jpg") != 0 &&
+          file_extension.compare(L".jpeg") != 0) {
+        new_image_cache_path = ConvertToFileType(L"jpeg", image_cache_path);
+      }
+      else {
+        new_image_cache_path = image_cache_path;
+      }
+    } else {
+      new_image_cache_path = ConvertToFileType(L"bmp", image_cache_path);
+    }
+
+    // Something happened while converting, halt everything.
     if (new_image_cache_path.empty()) {
-      npfuncs_->setexception(scriptable_object_, "Cannot convert image.");
+      npfuncs_->setexception(scriptable_object_,
+                             "Cannot convert to BMP image.");
       return false;
     }
 
     // Refer to the new path since that is where our encoded image might be.
     image_cache_path = new_image_cache_path;
     Debug(std::string("Image converted successfully to ").
-        append(SysWideToUTF8(new_image_cache_path)));
+          append(SysWideToUTF8(new_image_cache_path)));
   }
-  
+
+  // We need to set the tile and style of the wallpaper that the user specified.
   SetWallpaperStyle(tile, style);
 
+  // Query the Windows internals that a wallpaper needs to change.
   if (SystemParametersInfo(SPI_SETDESKWALLPAPER, 0,
       const_cast<wchar_t*>(image_cache_path.c_str()), 
       SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE)) {
     Debug("Wallpaper set successfully.");
     return true;
   }
+
+  // Error occurred setting the wallpaper.
   int error = GetLastError();
   char* error_str = new char[1024];
   sprintf(error_str, "Cannot set wallpaper. Code: %d Path: %S",
@@ -190,9 +212,6 @@ void DesktopService::Debug(const std::string& message) {
 }
 
 void DesktopService::SetWallpaperStyle(int tile, int style) {
-  
-  Debug("Trying to set wallpaper style.");
-
   wchar_t sub_key[] = L"Control Panel\\Desktop";
   DWORD dw_disp = 0;
   HKEY key;
@@ -224,55 +243,56 @@ void DesktopService::SetWallpaperStyle(int tile, int style) {
   }
 }
 
-int DesktopService::GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
+int DesktopService::GetEncoderClsid(const std::wstring& format, CLSID* pClsid) {
   UINT  num = 0;  // Number of image encoders.
   UINT  size = 0; // Size of the image encoder array in bytes.
 
-  ImageCodecInfo* pImageCodecInfo = NULL;
+  ImageCodecInfo* image_codec_info = NULL;
 
   GetImageEncodersSize(&num, &size);
   if (size == 0)
     return -1;  // Failure.
 
-  pImageCodecInfo = (ImageCodecInfo*)(malloc(size));
-  if (pImageCodecInfo == NULL)
+  image_codec_info = (ImageCodecInfo*)(malloc(size));
+  if (image_codec_info == NULL)
     return -1;  // Failure.
 
-  GetImageEncoders(num, size, pImageCodecInfo);
+  GetImageEncoders(num, size, image_codec_info);
 
   for (UINT j = 0; j < num; ++j) {
-    if (wcscmp(pImageCodecInfo[j].MimeType, format) == 0 ) {
-      *pClsid = pImageCodecInfo[j].Clsid;
-      free(pImageCodecInfo);
+    if (wcscmp(image_codec_info[j].MimeType, format.c_str()) == 0 ) {
+      *pClsid = image_codec_info[j].Clsid;
+      free(image_codec_info);
       return j;  // Success.
     }    
   }
 
-  free(pImageCodecInfo);
+  free(image_codec_info);
   return -1;  // Failure.
 }
 
-std::wstring DesktopService::ConvertToJPEG(const std::wstring& path) {
-  Debug("Image is not a known type, need to convert to JPEG.");
-
+std::wstring DesktopService::ConvertToFileType(const std::wstring& filetype,
+                                               const std::wstring& path) {
   // Prepare the JPEG encoder.
-  CLSID jpg_clsid;
-  GetEncoderClsid(L"image/jpeg", &jpg_clsid);
+  std::wstring mime_type(L"image/");
+  mime_type.append(filetype);
+  CLSID clsid;
+  GetEncoderClsid(mime_type.c_str(), &clsid);
 
   // Save the file to the stream.
   Bitmap* bitmap = new Bitmap(path.c_str());
   if (!bitmap) {
-    Debug("Something went wrong while constructing the bitmap.");
+    Debug("Something went wrong while constructing the image.");
     return std::wstring();
   }
 
   // Append jpg to the file for saving.
   std::wstring renamed_image_path(path);
-  renamed_image_path.append(L".jpg");
-  Status stat = bitmap->Save(renamed_image_path.c_str(), &jpg_clsid, NULL);
+  renamed_image_path.append(L".");
+  renamed_image_path.append(filetype);
+  Status stat = bitmap->Save(renamed_image_path.c_str(), &clsid, NULL);
   delete bitmap;
 
-  bool success = true;
   if (stat != Ok) {
     int error = GetLastError();
     char* error_str = new char[1024];
@@ -281,10 +301,27 @@ std::wstring DesktopService::ConvertToJPEG(const std::wstring& path) {
     Debug(error_str);
     delete[] error_str;
     error_str = NULL;
-    success = false;
   }
 
-  return success ? renamed_image_path : std::wstring();
+  return stat == Ok ? renamed_image_path : std::wstring();
+}
+
+bool DesktopService::IsJPEGSupported() {
+  OSVERSIONINFOEX osvi;
+  ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+  osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+  int bOsVersionInfoEx;
+
+  if (!(bOsVersionInfoEx = GetVersionEx((OSVERSIONINFO*) &osvi))) {
+    Debug("Cannot retrieve Windows Version.");
+    return false;
+  }
+  if (VER_PLATFORM_WIN32_NT == osvi.dwPlatformId &&  osvi.dwMajorVersion > 5) {
+    Debug("Windows Version supports JPEG as wallpaper.");
+    return true;
+  }
+  Debug("Windows Version does not support JPEG as wallpaper.");
+  return false;
 }
 
 }

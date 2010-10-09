@@ -25,7 +25,6 @@ class DesktopService {
   bool GetTileStyle(NPVariant* result);
   bool SetWallpaper(NPVariant* result, NPString path, int32_t style,
                     int32_t tile);
-  void Debug(const std::string& message);
 
  private:
   // Sets the registry for the wallpaper styles.
@@ -43,16 +42,27 @@ class DesktopService {
   // Get the requested image encoder class ID used for encoding from the given
   // |format| the result will be set to |pClsid|.
   // http://msdn.microsoft.com/en-us/library/ms533843(VS.85).aspx
-  int GetEncoderClsid(const WCHAR* format, CLSID* pClsid);
+  int GetEncoderClsid(const std::wstring& format, CLSID* pClsid);
 
-  // Convert the image located in |path| to JPEG and once its completed
-  // successfuly, |path| will be pointed to the new image location.
-  std::wstring ConvertToJPEG(const std::wstring& path);
+  // Send debug messages to the background.html page within chrome.
+  void Debug(const std::string& message);
+
+  // Convert the image located in |path| to the |filetype| requested and returns
+  // the new image location.
+  // http://msdn.microsoft.com/en-us/library/ms724429(VS.85).aspx
+  std::wstring ConvertToFileType(const std::wstring& filetype,
+                                 const std::wstring& path);
+
+  // Depending on the operating system, the supported images differ.
+  // - Windows Vista / 7 supports JPG / BMP.
+  // - Others supports just BMP.
+  bool IsJPEGSupported();
 
   NPP npp_;
   NPObject* scriptable_object_;
   NPNetscapeFuncs* npfuncs_;
   ULONG_PTR gdiplus_token_;
+  bool supports_jpeg_wallpaper_;
 };
 
 }  // namespace desktop_service
