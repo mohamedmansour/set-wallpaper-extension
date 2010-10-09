@@ -1,6 +1,38 @@
 <!DOCTYPE html> 
 <html>
 <script>
+
+// Settings.
+settings = {
+  get version() {
+    return localStorage['version'];
+  },
+  set version(val) {
+    localStorage['version'] = val;
+  },
+  get debug() {
+    var key = localStorage['debug'];
+    return (typeof key == 'undefined') ? false : key === 'true';
+  },
+  set debug(val) {
+    localStorage['debug'] = val;
+  },
+};
+
+/**
+ * Get the version number from the manifest.
+ *
+ * @returns {string} The current version number.
+ */
+function getVersion() {
+  var version = 'NaN';
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', chrome.extension.getURL('manifest.json'), false);
+  xhr.send(null);
+  var manifest = JSON.parse(xhr.responseText);
+  return manifest.version;
+}
+
 /**
  * Callback when the context menu was clicked.
  *
@@ -13,11 +45,30 @@ function onImage(info, tab) {
   chrome.tabs.create({url: url, index: index});
 }
 
-// Install context menus on images.
-chrome.contextMenus.create({
-  title: 'Set image as wallpaper',
-  contexts: ['image'],
-  onclick: onImage
-});
+
+function init() {
+  // Check if the version has changed. In case we want to do something in the
+  // future.
+  var currVersion = getVersion();
+  var prevVersion = settings.version
+  if (currVersion != prevVersion) {
+    // Check if we just installed this extension.
+    if (typeof prevVersion == 'undefined') {
+      // Do nothing now.
+    }
+    // Update the version incase we want to do something in future.
+    settings.version = currVersion;
+  }
+  
+  // Install context menus on images.
+  chrome.contextMenus.create({
+    title: 'Set image as wallpaper',
+    contexts: ['image'],
+    onclick: onImage
+  });
+}
+
+
+init();
 </script>
 </html>

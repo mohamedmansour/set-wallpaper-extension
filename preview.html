@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
-<title>Set Background</title>
-<link rel="stylesheet" type="text/css" href="/css/base.css" />
+<title>Set Wallpaper</title>
+<link rel="stylesheet" type="text/css" href="/css/preview.css" />
 <script type='text/javascript' src='/js/shared.js'></script>
 <script type='text/javascript' src='/js/position_enum.js'></script>
 <script type='text/javascript' src='/js/dimension.js'></script>
@@ -25,6 +25,7 @@
   </div>
   <div id="buttons">
     <a class="green button" onclick="doSubmit();">Set wallpaper</a>
+    <a class="orange button" onclick="doOptions();">Options</a>
     <a class="yellow button" onclick="doClose();">Close</a>
   </div>
   <embed type="application/x-vnd-set-wallpaper" id="pluginobj"
@@ -32,6 +33,7 @@
   <script>
   // Initialize the plugin.
   var app = document.getElementById("pluginobj");
+  var bkg = chrome.extension.getBackgroundPage();
   var preview = null;
   
   /**
@@ -41,6 +43,7 @@
     var imageURL = window.location.hash.substring(1);
     preview = new WallpaperPreview('canvas', imageURL, PositionEnum.STRETCH);
     try {
+      app.debug = bkg.settings.debug;
       var hex = app.systemColor();
       preview.setCanvasBackground(hex);
     }
@@ -80,10 +83,34 @@
   }
   
   /**
+   * Open a singleton page, which means, if a page already exists, it just selects it.
+   * @param url The page which it will navigate to.
+   */
+  function openSingletonPage(url, callback) {
+    chrome.windows.getCurrent(function(win) {
+      chrome.tabs.getAllInWindow(win.id, function(tabs) {
+        // Check if the page is already open.
+        for (var i = 0; i < tabs.length; i++) {
+          // If the page exists, just select it.
+          if (tabs[i].url.indexOf(url) == 0) {
+            chrome.tabs.update(tabs[i].id, {selected: true});
+            return;
+          }
+        }
+        chrome.tabs.create({url: url});
+      });
+    });
+  }
+  
+  /**
    * Close the preview.
    */
   function doClose() {
     window.close();  
+  }
+  
+  function doOptions() {
+    openSingletonPage(chrome.extension.getURL('options.html'));
   }
   </script>
 </body>

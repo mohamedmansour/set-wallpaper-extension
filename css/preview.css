@@ -103,6 +103,14 @@ ul li:hover {
   background-color: #fc9200;
 }
 
+.orange.button, .yellow.button:visited  {
+  background-color: #ff5c00;
+}
+
+.orange.button:hover {
+  background-color: #d45500;
+}
+
 #area {
   background: #fff;
   padding: 10px;

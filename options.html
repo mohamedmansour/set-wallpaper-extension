@@ -1,0 +1,85 @@
+<!DOCTYPE html> 
+<html>
+<head>
+<title>Set Wallpaper Options</title>
+<link rel="stylesheet" type="text/css" href="/css/options.css">
+<script type="text/javascript">
+var bkg = chrome.extension.getBackgroundPage();
+
+/**
+* Saves options to localStorage.
+*/
+function saveOptions() {
+  // Save settings.
+  bkg.settings.debug = document.getElementById('debug').checked;
+  
+  
+  // Refresh opened preview screens.
+  var views = chrome.extension.getViews();
+  for (var i in views) {
+    var location = views[i].location;
+    if (location.pathname == '/preview.html') {
+      location.reload();
+    }
+  }
+  
+  // Update status to let user know options were saved.
+  var info = document.getElementById('info-message');
+  info.style.display = 'inline';
+  info.style.opacity = 1;
+  setTimeout(function() {
+    info.style.opacity = 0.0;
+  }, 1000);
+}
+
+/**
+* Restore all options.
+*/
+function restoreOptions() {
+  document.getElementById('version').innerHTML = ' (v' + bkg.settings.version + ')';
+  document.getElementById('debug').checked = bkg.settings.debug;
+}
+
+</script>
+</head>
+
+<body onload="restoreOptions()"> 
+  <form onsubmit="return false;">
+  <div id="body-container">
+    <div id="header">
+      <h1>Set Wallpaper Options<em id="version"></em></h1>
+    </div>
+    <p>Make sure you save the settings after your done editing!</p>
+    <div class="extension-template">
+      <div class="extension-header">General</div>
+      <div class="extension-options">
+      </div>
+    </div>
+    <div class="extension-template">
+      <div class="extension-header">Debugging</div>
+      <div class="extension-options">
+        <p>To report a bug to the developer, please enable the debugger below,
+           and it will post the debug messages to the "background.html"
+           inspector located in chrome://extensions when you click on it on the
+           console tab.</p>
+        <dl>
+          <dt>Show on console:</dt>
+          <dd>
+            <label for="debug"><input type="checkbox" id="debug" /></label>
+          </dd>
+        </dl>
+      </div>
+    </div>
+    <div id="extension-footer">
+      <span id="info-message">Options saved!</span>
+      <button onclick="saveOptions();">Save</button>
+      <button onclick="window.close();">Close</button>
+    </div>
+    <div id="credits">
+      Extension developed by <a href="http://www.mohamedmansour.com">Mohamed Mansour</a>, 
+      Source Code available in <a href="http://github.com/mohamedmansour/set-wallpaper-extension">GitHub</a>
+    </div>
+  </div>
+  </form>
+</body>
+</html>

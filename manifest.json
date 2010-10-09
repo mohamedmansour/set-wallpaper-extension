@@ -11,5 +11,6 @@
     { "path": "setwallpaper_plugin.dll", "public": true }
   ],
   "background_page": "background.html",
+  "options_page": "options.html",
   "permissions": ["contextMenus", "tabs"]
 }
