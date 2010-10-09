@@ -25,6 +25,8 @@ class DesktopService {
   bool GetTileStyle(NPVariant* result);
   bool SetWallpaper(NPVariant* result, NPString path, int32_t style,
                     int32_t tile);
+  bool debug() const { return debug_; }
+  void set_debug(bool debug) { debug_ = debug; }
 
  private:
   // Sets the registry for the wallpaper styles.
@@ -62,6 +64,7 @@ class DesktopService {
   NPObject* scriptable_object_;
   NPNetscapeFuncs* npfuncs_;
   ULONG_PTR gdiplus_token_;
+  bool debug_;
   bool supports_jpeg_wallpaper_;
 };
 

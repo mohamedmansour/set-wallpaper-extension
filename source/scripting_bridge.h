@@ -19,6 +19,8 @@ class ScriptingBridge : public NPObject {
   typedef bool (ScriptingBridge::*MethodSelector)(const NPVariant* args,
                                                   uint32_t arg_count,
                                                   NPVariant* result);
+  typedef bool (ScriptingBridge::*GetPropertySelector)(NPVariant* value);
+  typedef bool (ScriptingBridge::*SetPropertySelector)(const NPVariant* result);
 
   explicit ScriptingBridge(NPP npp): npp_(npp) {}
   virtual ~ScriptingBridge();
@@ -39,6 +41,7 @@ class ScriptingBridge : public NPObject {
   virtual bool SetProperty(NPIdentifier name, const NPVariant* value);
   virtual bool RemoveProperty(NPIdentifier name);
 
+  // Initializes all the bridge identifiers from JavaScript land.
   static bool InitializeIdentifiers(NPNetscapeFuncs* npfuncs);
 
   static NPClass np_class;
@@ -58,14 +61,21 @@ class ScriptingBridge : public NPObject {
   bool SetWallpaper(const NPVariant* args, uint32_t arg_count,
                     NPVariant* result);
 
+  // Accessor/mutator for the debug property.
+  bool GetDebug(NPVariant* value);
+  bool SetDebug(const NPVariant* value);
+
  private:
   NPP npp_;
 
   static NPIdentifier id_system_color;
   static NPIdentifier id_wallaper;
   static NPIdentifier id_tile_style;
+  static NPIdentifier id_debug;
 
   static std::map<NPIdentifier, MethodSelector>* method_table;
+  static std::map<NPIdentifier, GetPropertySelector>* get_property_table;
+  static std::map<NPIdentifier, SetPropertySelector>* set_property_table;
 };
 
 }  // namespace desktop_service

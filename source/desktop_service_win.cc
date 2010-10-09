@@ -23,6 +23,7 @@ DesktopService::DesktopService(NPP npp, NPNetscapeFuncs* npfuncs)
       scriptable_object_(NULL),
       npfuncs_(npfuncs),
       gdiplus_token_(NULL),
+      debug_(false),
       supports_jpeg_wallpaper_(IsJPEGSupported()) {
   ScriptingBridge::InitializeIdentifiers(npfuncs);
   GdiplusStartupInput gdiplus_startup_input;
@@ -159,6 +160,9 @@ bool DesktopService::SetWallpaper(NPVariant* result,
 }
 
 void DesktopService::Debug(const std::string& message) {
+  if (!debug_)
+    return;
+
   // Get window object.
   NPObject* window = NULL;
   npfuncs_->getvalue(npp_, NPNVWindowNPObject, &window);

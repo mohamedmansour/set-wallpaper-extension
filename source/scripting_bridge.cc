@@ -11,10 +11,19 @@ namespace desktop_service {
 NPIdentifier ScriptingBridge::id_system_color;
 NPIdentifier ScriptingBridge::id_wallaper;
 NPIdentifier ScriptingBridge::id_tile_style;
+NPIdentifier ScriptingBridge::id_debug;
 
 // Method table for use by HasMethod and Invoke.
 std::map<NPIdentifier, ScriptingBridge::MethodSelector>*
     ScriptingBridge::method_table;
+
+// Property table for use by {Has|Get}Property.
+std::map<NPIdentifier, ScriptingBridge::GetPropertySelector>*
+    ScriptingBridge::get_property_table;
+
+// Property table for use by {Set}Property.
+std::map<NPIdentifier, ScriptingBridge::SetPropertySelector>*
+    ScriptingBridge::set_property_table;
 
 // Creates the plugin-side instance of NPObject.
 // Called by NPN_CreateObject, declared in npruntime.h
@@ -31,21 +40,40 @@ bool ScriptingBridge::InitializeIdentifiers(NPNetscapeFuncs* npfuncs) {
   id_system_color = npfuncs->getstringidentifier("systemColor");
   id_tile_style = npfuncs->getstringidentifier("tileStyle");
   id_wallaper = npfuncs->getstringidentifier("setWallpaper");
+  id_debug = npfuncs->getstringidentifier("debug");
 
   method_table =
-    new(std::nothrow) std::map<NPIdentifier, MethodSelector>;
+      new(std::nothrow) std::map<NPIdentifier, MethodSelector>;
   if (method_table == NULL)
     return false;
 
   method_table->insert(
-    std::pair<NPIdentifier, MethodSelector>(id_system_color,
-                                            &ScriptingBridge::GetSystemColor));
+      std::pair<NPIdentifier, MethodSelector>(
+          id_system_color, &ScriptingBridge::GetSystemColor));
   method_table->insert(
-    std::pair<NPIdentifier, MethodSelector>(id_tile_style,
-                                            &ScriptingBridge::GetTileStyle));
+      std::pair<NPIdentifier, MethodSelector>(
+          id_tile_style, &ScriptingBridge::GetTileStyle));
   method_table->insert(
-    std::pair<NPIdentifier, MethodSelector>(id_wallaper,
-                                            &ScriptingBridge::SetWallpaper));
+      std::pair<NPIdentifier, MethodSelector>(
+          id_wallaper, &ScriptingBridge::SetWallpaper));
+
+  get_property_table =
+      new(std::nothrow) std::map<NPIdentifier, GetPropertySelector>;
+  if (get_property_table == NULL) {
+    return false;
+  }
+  set_property_table =
+      new(std::nothrow) std::map<NPIdentifier, SetPropertySelector>;
+  if (set_property_table == NULL) {
+    return false;
+  }
+
+  get_property_table->insert(
+      std::pair<NPIdentifier, GetPropertySelector>(
+          id_debug, &ScriptingBridge::GetDebug));
+  set_property_table->insert(
+      std::pair<NPIdentifier, SetPropertySelector>(
+          id_debug, &ScriptingBridge::SetDebug));
 
   return true;
 }
@@ -97,6 +125,28 @@ bool ScriptingBridge::SetWallpaper(const NPVariant* args,
   return false;
 }
 
+bool ScriptingBridge::GetDebug(NPVariant* value) {
+  DesktopService* desktop_service = static_cast<DesktopService*>(npp_->pdata);
+  if (desktop_service) {
+    BOOLEAN_TO_NPVARIANT(desktop_service->debug(), *value);
+    return true;
+  }
+  VOID_TO_NPVARIANT(*value);
+  return false;
+}
+
+bool ScriptingBridge::SetDebug(const NPVariant* value) {
+  DesktopService* desktop_service = static_cast<DesktopService*>(npp_->pdata);
+  if (!desktop_service)
+    return false;
+
+  if (value->type != NPVariantType_Bool)
+    return false;
+
+  desktop_service->set_debug(NPVARIANT_TO_BOOLEAN(*value));
+  return true;
+}
+
 // =============================================================================
 //
 //   NPAPI Overrides
@@ -114,19 +164,32 @@ bool ScriptingBridge::HasMethod(NPIdentifier name) {
 // Class-specific implementation of HasProperty, used by the C-style one
 // below.
 bool ScriptingBridge::HasProperty(NPIdentifier name) {
-  return false;  // Not implemented.
+  std::map<NPIdentifier, GetPropertySelector>::iterator i;
+  i = get_property_table->find(name);
+  return i != get_property_table->end();
 }
 
 // Class-specific implementation of GetProperty, used by the C-style one
 // below.
 bool ScriptingBridge::GetProperty(NPIdentifier name, NPVariant *value) {
-  return false;  // Not implemented.
+  VOID_TO_NPVARIANT(*value);
+  std::map<NPIdentifier, GetPropertySelector>::iterator i;
+  i = get_property_table->find(name);
+  if (i != get_property_table->end()) {
+    return (this->*(i->second))(value);
+  }
+  return false;
 }
 
 // Class-specific implementation of SetProperty, used by the C-style one
 // below.
 bool ScriptingBridge::SetProperty(NPIdentifier name, const NPVariant* value) {
-  return false;  // Not implemented.
+  std::map<NPIdentifier, SetPropertySelector>::iterator i;
+  i = set_property_table->find(name);
+  if (i != set_property_table->end()) {
+    return (this->*(i->second))(value);
+  }
+  return false;
 }
 
 // Class-specific implementation of RemoveProperty, used by the C-style one
