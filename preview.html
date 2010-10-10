@@ -74,7 +74,7 @@
   function doSubmit() {
     try {
       var position = preview.getPosition();
-      app.setWallpaper(preview.getImageURL(), position.style, position.tile);
+      app.setWallpaper(preview.getImageURL(), position);
     }
     catch (e) {
       alert('An error occured while setting the wallpaper, please inform' +

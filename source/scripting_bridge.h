@@ -55,8 +55,8 @@ class ScriptingBridge : public NPObject {
   bool GetSystemColor(const NPVariant* args, uint32_t arg_count,
                       NPVariant* result);
   // Gets the tile and wallpaper style.
-  bool GetTileStyle(const NPVariant* args, uint32_t arg_count,
-                    NPVariant* result);
+  bool GetWallpaperStyle(const NPVariant* args, uint32_t arg_count,
+                         NPVariant* result);
   // Sets the wallpaper.
   bool SetWallpaper(const NPVariant* args, uint32_t arg_count,
                     NPVariant* result);
@@ -70,7 +70,7 @@ class ScriptingBridge : public NPObject {
 
   static NPIdentifier id_system_color;
   static NPIdentifier id_wallaper;
-  static NPIdentifier id_tile_style;
+  static NPIdentifier id_style;
   static NPIdentifier id_debug;
 
   static std::map<NPIdentifier, MethodSelector>* method_table;

@@ -51,7 +51,7 @@ BEGIN
             VALUE "LegalCopyright", "Copyright 2010 Mohamed Mansour."
             VALUE "MIMEType", "application/x-vnd-set-wallpaper"
             VALUE "OriginalFilename", "setwallpaper-plugin.dll"
-            VALUE "ProductName", "TESTING - Set Wallpaper Plugin"
+            VALUE "ProductName", "Set Wallpaper Plugin"
             VALUE "ProductVersion", "1, 0, 0, 0"
         END
     END

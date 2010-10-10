@@ -9,7 +9,7 @@
  * @enum {Object<number, number>}
  */
 PositionEnum = {
-  STRETCH : {style: 2, tile: 0},
-  TILE    : {style: 0, tile: 1},
-  CENTER  : {style: 0, tile: 0},
+  CENTER  : 0,
+  TILE    : 1,
+  STRETCH : 2,
 };
