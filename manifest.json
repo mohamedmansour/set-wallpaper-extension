@@ -1,6 +1,6 @@
 {
-  "name": "Set image as wallpaper",
-  "version": "0.0.1",
+  "name": "Set image as wallpaper (Windows)",
+  "version": "1.0.0",
   "description": "Set image as wallpaper in Windows. You can stretch, tile, and center.",
   "icons": {
     "16": "img/icon16.png",
