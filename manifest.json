@@ -1,5 +1,5 @@
 {
-  "name": "BETA - Set image as wallpaper",
+  "name": "Set image as wallpaper",
   "version": "0.0.1",
   "description": "Set image as wallpaper in Windows. You can stretch, tile, and center.",
   "icons": {
@@ -12,5 +12,5 @@
   ],
   "background_page": "background.html",
   "options_page": "options.html",
-  "permissions": ["contextMenus", "tabs"]
+  "permissions": ["contextMenus", "tabs", "http://*/*", "https://*/*", "ftp://*/*"]
 }

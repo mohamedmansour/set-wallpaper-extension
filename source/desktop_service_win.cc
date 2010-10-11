@@ -137,30 +137,10 @@ void DesktopService::SendConsole(const char* message) {
   NPObject* window = NULL;
   npfuncs_->getvalue(npp_, NPNVWindowNPObject, &window);
 
-  // Get chrome object.
-  NPVariant chromeVar;
-  NPIdentifier id = npfuncs_->getstringidentifier("chrome");
-  npfuncs_->utf8fromidentifier(id);
-  npfuncs_->getproperty(npp_, window, id, &chromeVar);
-  NPObject* chrome = NPVARIANT_TO_OBJECT(chromeVar);
-
-  // Get extension object.
-  NPVariant extensionVar;
-  id = npfuncs_->getstringidentifier("extension");
-  npfuncs_->getproperty(npp_, chrome, id, &extensionVar);
-  NPObject* extension = NPVARIANT_TO_OBJECT(extensionVar);
-
-  // Get the getBackground object.
-  NPVariant backgroundVar;
-  id = npfuncs_->getstringidentifier("getBackgroundPage");
-  NPVariant backgroundResponse;
-  npfuncs_->invoke(npp_, extension, id, NULL, 0, &backgroundResponse);
-  NPObject* background = NPVARIANT_TO_OBJECT(backgroundResponse);
-
   // Get console object.
   NPVariant consoleVar;
-  id = npfuncs_->getstringidentifier("console");
-  npfuncs_->getproperty(npp_, background, id, &consoleVar);
+  NPIdentifier id = npfuncs_->getstringidentifier("console");
+  npfuncs_->getproperty(npp_, window, id, &consoleVar);
   NPObject* console = NPVARIANT_TO_OBJECT(consoleVar);
 
   // Get the debug object.
@@ -178,8 +158,6 @@ void DesktopService::SendConsole(const char* message) {
   // Cleanup all allocated objects, otherwise, reference count and
   // memory leaks will happen.
   npfuncs_->releaseobject(window);
-  npfuncs_->releasevariantvalue(&chromeVar);
-  npfuncs_->releasevariantvalue(&backgroundVar);
   npfuncs_->releasevariantvalue(&consoleVar);
   npfuncs_->releasevariantvalue(&voidResponse);
 }

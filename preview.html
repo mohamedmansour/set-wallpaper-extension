@@ -6,53 +6,46 @@
 <script type='text/javascript' src='/js/position_enum.js'></script>
 <script type='text/javascript' src='/js/dimension.js'></script>
 <script type='text/javascript' src='/js/wallpaper_preview.js'></script>
-<body onLoad="init();">
-  <h1>TESTING!</h1>
-  <div id="area">
-    <div id="preview">
-      <canvas id="canvas" width="540" height="304" ></canvas>
+<body>
+<div id="fnpmapejgepknmmkciiclcloomblhopm">
+  <div id="crx_wlp_area">
+    <div id="crx_wlp_preview">
+      <h1>Set Desktop Wallpaper</h1>
+      <canvas id="crx_wlp_canvas" width="540" height="304" ></canvas>
+      <div id="crx_wlp_options">
+        <ul>
+          <li onClick="changeSelection(this, PositionEnum.STRETCH);"
+              class="selected" id="crx_wlp_stretchButton">Stretch</li>
+          <li onClick="changeSelection(this, PositionEnum.TILE);"
+              id="crx_wlp_tileButton">Tile</li>
+          <li onClick="changeSelection(this, PositionEnum.CENTER);"
+              id="crx_wlp_centerButton">Center</li>
+        </ul>
+      </div>
+      <div id="crx_wlp_buttons">
+        <a class="green crx_wlp_button" onclick="doSubmit();">Set wallpaper</a>
+        <a class="orange crx_wlp_button" onclick="doOptions();">Options</a>
+        <a class="yellow crx_wlp_button" onclick="window.close();">Close</a>
+      </div>
     </div>
-    <div id="options">
-      <ul>
-        <li onClick="changeSelection(this, PositionEnum.STRETCH);"
-            class="selected" id="stretchButton">Stretch</li>
-        <li onClick="changeSelection(this, PositionEnum.TILE);"
-            id="tileButton">Tile</li>
-        <li onClick="changeSelection(this, PositionEnum.CENTER);"
-            id="centerButton">Center</li>
-      </ul>
+    <div id="crx_wlp_tweet" ><a href="http://twitter.com/mohamedmansour">
+      @mohamedmansour</a>
     </div>
   </div>
-  <div id="buttons">
-    <a class="green button" onclick="doSubmit();">Set wallpaper</a>
-    <a class="orange button" onclick="doOptions();">Options</a>
-    <a class="yellow button" onclick="doClose();">Close</a>
-  </div>
-  <embed type="application/x-vnd-set-wallpaper" id="pluginobj"
-         width="0" height="0" />
+</div>
   <script>
   // Initialize the plugin.
-  var app = document.getElementById("pluginobj");
   var bkg = chrome.extension.getBackgroundPage();
   var preview = null;
-  
-  /**
-   * Initialize the previewer.
-   */
-  function init() {
-    var imageURL = window.location.hash.substring(1);
-    preview = new WallpaperPreview('canvas', imageURL, PositionEnum.STRETCH);
-    try {
-      app.debug = bkg.settings.debug;
-      var hex = app.systemColor();
-      preview.setCanvasBackground(hex);
-    }
-    catch (e) {
-      alert('An error occured while grabbing your system color, please inform' +
-            ' the developer. Visit the extension page for more info.');
-    }
-  }
-  
+
+  // Force images.
+  document.getElementById('crx_wlp_stretchButton').style.backgroundImage =
+      'url(' + chrome.extension.getURL('/img/stretch.jpg') + ')';
+  document.getElementById('crx_wlp_tileButton').style.backgroundImage =
+      'url(' + chrome.extension.getURL('/img/tile.jpg') + ')';
+  document.getElementById('crx_wlp_centerButton').style.backgroundImage =
+      'url(' + chrome.extension.getURL('/img/center.jpg') + ')';
+      
   /**
    * Change the selection of the wallpaper style.
    * @param {HTMLElement} dom The current list item.
@@ -72,46 +65,32 @@
    * Submit a request to change the wallpaper.
    */
   function doSubmit() {
-    try {
-      var position = preview.getPosition();
-      app.setWallpaper(preview.getImageURL(), position);
-    }
-    catch (e) {
-      alert('An error occured while setting the wallpaper, please inform' +
-            ' the developer. Visit the extension page for more info.');
-    }
-  }
-  
-  /**
-   * Open a singleton page, which means, if a page already exists, it just selects it.
-   * @param url The page which it will navigate to.
-   */
-  function openSingletonPage(url, callback) {
-    chrome.windows.getCurrent(function(win) {
-      chrome.tabs.getAllInWindow(win.id, function(tabs) {
-        // Check if the page is already open.
-        for (var i = 0; i < tabs.length; i++) {
-          // If the page exists, just select it.
-          if (tabs[i].url.indexOf(url) == 0) {
-            chrome.tabs.update(tabs[i].id, {selected: true});
-            return;
-          }
+    chrome.extension.sendRequest({
+        method: 'SetWallpaper', 
+        data: {
+          image: preview.getImageURL(),
+          position: preview.getPosition()
         }
-        chrome.tabs.create({url: url});
-      });
     });
   }
   
   /**
-   * Close the preview.
+   * View Options.
    */
-  function doClose() {
-    window.close();  
+  function doOptions() {
+     chrome.extension.sendRequest({method: 'OpenOptions'});
   }
   
-  function doOptions() {
-    openSingletonPage(chrome.extension.getURL('options.html'));
-  }
+  // Listen for extension requests.
+  chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
+    if (req.method == 'SetImage') {
+      preview = new WallpaperPreview('crx_wlp_canvas', req.data, PositionEnum.STRETCH);
+      chrome.extension.sendRequest({method: 'GetSystemColor'}, function(res) {
+        preview.setCanvasBackground(res.color);
+      });
+    }
+    sendResponse({});
+  });
   </script>
 </body>
 </html>

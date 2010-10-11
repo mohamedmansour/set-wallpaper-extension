@@ -1,5 +1,8 @@
 <!DOCTYPE html> 
 <html>
+<embed type="application/x-vnd-set-wallpaper" id="pluginobj" 
+       width="0" height="0" />
+       
 <script>
 
 // Settings.
@@ -16,8 +19,19 @@ settings = {
   },
   set debug(val) {
     localStorage['debug'] = val;
+    plugin.debug = val;
+  },
+  get user_interface() {
+    var key = localStorage['user_interface'];
+    return (typeof key == 'undefined') ? 'newtab' : key;
+  },
+  set user_interface(val) {
+    localStorage['user_interface'] = val;
   },
 };
+
+// Plugin.
+plugin = document.getElementById('pluginobj');
 
 /**
  * Get the version number from the manifest.
@@ -40,12 +54,50 @@ function getVersion() {
  * @param {Object<Tab>} tab The tab that it was triggered.
  */
 function onImage(info, tab) {
-  var url = 'preview.html#' + info.srcUrl;
   var index = tab.index + 1;
-  chrome.tabs.create({url: url, index: index});
+  
+  if (settings.user_interface == 'overlay') {
+    chrome.tabs.insertCSS(tab.id, {file: '/css/overlay.css'});
+    chrome.tabs.executeScript(tab.id, {file: '/js/shared.js'});
+    chrome.tabs.executeScript(tab.id, {file: '/js/position_enum.js'});
+    chrome.tabs.executeScript(tab.id, {file: '/js/dimension.js'});
+    chrome.tabs.executeScript(tab.id, {file: '/js/wallpaper_preview.js'});
+    chrome.tabs.executeScript(tab.id, {file: '/js/overlay.js'}, function() {
+      chrome.tabs.sendRequest(tab.id, {method: 'SetImage', data: info.srcUrl });
+    });
+  }
+  else {
+    chrome.tabs.create({url: 'preview.html', index: index}, function(newtab) {
+      chrome.tabs.sendRequest(newtab.id, {
+          method: 'SetImage',
+          data: info.srcUrl 
+      });
+    });
+  }
 }
 
-
+/**
+ * Open a singleton page, which means, if a page already exists, it
+ * just selects it.
+ *
+ * @param url The page which it will navigate to.
+ */
+function openSingletonPage(url) {
+  chrome.windows.getCurrent(function(win) {
+    chrome.tabs.getAllInWindow(win.id, function(tabs) {
+      for (var i = 0; i < tabs.length; i++) {
+        if (tabs[i].url.indexOf(url) == 0) {
+          chrome.tabs.update(tabs[i].id, {selected: true});
+          return;
+        }
+      }
+      chrome.tabs.create({url: url});
+    });
+  });
+}
+/**
+ * Initialization routine.
+ */
 function init() {
   // Check if the version has changed. In case we want to do something in the
   // future.
@@ -60,15 +112,31 @@ function init() {
     settings.version = currVersion;
   }
   
+  // Sets the debugger according to the settings. 
+  plugin.debug = settings.debug;
+  
   // Install context menus on images.
   chrome.contextMenus.create({
     title: 'Set image as wallpaper',
     contexts: ['image'],
     onclick: onImage
   });
+  
+  chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
+    if (req.method == 'SetWallpaper') {
+      plugin.setWallpaper(req.data.image, req.data.position);
+      sendResponse({});
+    }
+    else if (req.method == 'GetSystemColor') {
+      sendResponse({color: plugin.systemColor()});
+    }
+    else if (req.method == 'OpenOptions') {
+      openSingletonPage(chrome.extension.getURL('/options.html'));
+      sendResponse({});
+    }
+  });
 }
 
 
-init();
-</script>
+init();</script>
 </html>

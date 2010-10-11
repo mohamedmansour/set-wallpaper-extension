@@ -12,8 +12,8 @@
  */
 WallpaperPreview = function(canvasID, imageURL, opt_position)
 {
-  this.canvas = document.getElementById(canvasID);
-  this.ctx = canvas.getContext('2d');
+  this.ctx = document.getElementById(canvasID).getContext('2d');
+  this.canvas = document.getElementById(canvasID); // Need to recall it, bug.
   this.imageURL = imageURL;
   this.imageBuffer = document.createElement('img');
   this.imageBuffer.src = imageURL;
