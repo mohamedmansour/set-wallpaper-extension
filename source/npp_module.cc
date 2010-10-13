@@ -1,13 +1,18 @@
 // Copyright 2010 Mohamed Mansour. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
 
+#include <windows.h>
 #include <npapi.h>
 #include <npfunctions.h>
 
 // NPAPI extensions.
 static NPNetscapeFuncs* npnfuncs = NULL;
 
+static HANDLE hLogFile;
 
 NPNetscapeFuncs* GetNetscapeFuncs() {
   return npnfuncs;
@@ -33,6 +38,14 @@ NPError OSCALL NP_GetEntryPoints(NPPluginFuncs *plugin_functions) {
 // Declaration: npapi.h
 // Documentation URL: https://developer.mozilla.org/en/NP_Initialize
 NPError OSCALL NP_Initialize(NPNetscapeFuncs *npnf) {
+  _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+  hLogFile = CreateFile(L"C:\\Users\\Mohamed\\Desktop\\deploy\\log.txt",
+      GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, 
+      FILE_ATTRIBUTE_NORMAL, NULL);
+  _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+  _CrtSetReportFile(_CRT_WARN, hLogFile);
+  _RPT0(_CRT_WARN, "Initializing\n");
+
   if(npnf == NULL)
     return NPERR_INVALID_FUNCTABLE_ERROR;
 
@@ -50,6 +63,8 @@ NPError OSCALL NP_Initialize(NPNetscapeFuncs *npnf) {
 // Declaration: npapi.h
 // Documentation URL: https://developer.mozilla.org/en/NP_Shutdown
 NPError OSCALL NP_Shutdown() {
+  _RPT0(_CRT_WARN, "closing file\n");
+  CloseHandle(hLogFile);
 	return NPERR_NO_ERROR;
 }
 }  // extern "C"
