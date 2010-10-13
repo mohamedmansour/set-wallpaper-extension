@@ -18,7 +18,8 @@ WallpaperPreview = function(canvasID, imageURL, opt_position)
   this.imageBuffer = document.createElement('img');
   this.imageBuffer.src = imageURL;
   this.imageBuffer.onload = this._loadComplete.bind(this);
-  this.position = opt_position || PositionEnum.STRETCH;
+  this.position = (typeof opt_position == 'undefined') ?
+      PositionEnum.STRETCH : opt_position;
 };
 
 /**

@@ -28,6 +28,13 @@ settings = {
   set user_interface(val) {
     localStorage['user_interface'] = val;
   },
+  get position() {
+    var key = localStorage['position'];
+    return (typeof key == 'undefined') ? 'stretch' : key;
+  },
+  set position(val) {
+    localStorage['position'] = val;
+  },
 };
 
 // Plugin.
@@ -63,14 +70,23 @@ function onImage(info, tab) {
     chrome.tabs.executeScript(tab.id, {file: '/js/dimension.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/wallpaper_preview.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/overlay.js'}, function() {
-      chrome.tabs.sendRequest(tab.id, {method: 'SetImage', data: info.srcUrl });
+      chrome.tabs.sendRequest(tab.id, {
+        method: 'SetImage',
+        data: {
+          image: info.srcUrl,
+          position: settings.position
+        }
+      });
     });
   }
   else {
     chrome.tabs.create({url: 'preview.html', index: index}, function(newtab) {
       chrome.tabs.sendRequest(newtab.id, {
-          method: 'SetImage',
-          data: info.srcUrl 
+        method: 'SetImage',
+        data: {
+          image: info.srcUrl,
+          position: settings.position
+        }
       });
     });
   }

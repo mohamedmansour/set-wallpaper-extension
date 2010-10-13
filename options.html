@@ -13,6 +13,7 @@ function saveOptions() {
   // Save settings.
   bkg.settings.debug = document.getElementById('debug').checked;
   bkg.settings.user_interface = document.getElementById('user_interface').value;
+  bkg.settings.position = document.getElementById('position').value;
   
   // Update status to let user know options were saved.
   var info = document.getElementById('info-message');
@@ -30,6 +31,7 @@ function restoreOptions() {
   document.getElementById('version').innerHTML = ' (v' + bkg.settings.version + ')';
   document.getElementById('debug').checked = bkg.settings.debug;
   document.getElementById('user_interface').value = bkg.settings.user_interface;
+  document.getElementById('position').value = bkg.settings.position;
 }
 
 </script>
@@ -55,6 +57,14 @@ function restoreOptions() {
             <select id="user_interface">
               <option value="newtab">New tab page</option>
               <option value="overlay">Overlay (experimental)</option>
+            </select>
+          </dd>
+          <dt>Default position:</dt>
+          <dd>
+            <select id="position">
+              <option value="stretch">Stretch</option>
+              <option value="center">Center</option>
+              <option value="tile">Tile</option>
             </select>
           </dd>
         </dl>

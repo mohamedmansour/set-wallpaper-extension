@@ -29,7 +29,7 @@ var text = '' +
 '      <canvas id="crx_wlp_canvas" width="540" height="304" ></canvas>' +
 '      <div id="options">' +
 '        <ul>' +
-'          <li class="selected" id="crx_wlp_stretchButton">Stretch</li>' +
+'          <li id="crx_wlp_stretchButton">Stretch</li>' +
 '          <li id="crx_wlp_tileButton">Tile</li>' +
 '          <li id="crx_wlp_centerButton">Center</li>' +
 '        </ul>' +
@@ -111,10 +111,16 @@ centerButton.addEventListener('click', function(e) {
 // Listen for extension requests.
 chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
   if (req.method == 'SetImage') {
-    preview = new WallpaperPreview('crx_wlp_canvas', req.data, PositionEnum.STRETCH);
+    // Startup the previewer to do its business!
+    preview = new WallpaperPreview('crx_wlp_canvas', req.data.image,
+                                    PositionEnum.valueOf(req.data.position));
+    // Send a call natively to inform the operating system about its color.
     chrome.extension.sendRequest({method: 'GetSystemColor'}, function(res) {
       preview.setCanvasBackground(res.color);
     });
+    // Set the appropriate item selected.
+    var i = document.getElementById('crx_wlp_' + req.data.position + 'Button');
+    i.className = 'selected';
   }
   sendResponse({});
 });
