@@ -28,12 +28,38 @@ function saveOptions() {
 * Restore all options.
 */
 function restoreOptions() {
+  // Restore settings.
   document.getElementById('version').innerHTML = ' (v' + bkg.settings.version + ')';
   document.getElementById('debug').checked = bkg.settings.debug;
-  document.getElementById('user_interface').value = bkg.settings.user_interface;
   document.getElementById('position').value = bkg.settings.position;
+  var user_interface = document.getElementById('user_interface');
+  user_interface.value = bkg.settings.user_interface;
+  
+  // Add couple of listeners.
+  user_interface.addEventListener('change', function(e) {
+    var value = this.options[this.selectedIndex].value;
+    setUserInterfaceNote(value);
+  }, false);
+  setUserInterfaceNote(bkg.settings.user_interface);
 }
 
+/**
+ * Changes the note for the userinterface, to help and assist the user what
+ * the options really mean.
+ *
+ * @param {string} type The type of message that needs to change.
+ */
+function setUserInterfaceNote(type) {
+  var message = 'Error, type does not exist.';
+  if (type == 'overlay')
+    message = 'Creates an overlay preview within the tab itself.';
+  else if (type == 'none')
+    message = 'No preview, automatically sets the wallpaper with the default ' +
+              'position.';
+  else if (type == 'newtab')
+    message = 'A new tab page will open with the wallpaper preview screen.';
+  document.getElementById('user_interface_note').innerHTML = message;
+}
 </script>
 </head>
 
@@ -60,14 +86,17 @@ function restoreOptions() {
         <p>Feel free to try out the experimental overlay feature. If it looks
            awkward in some websites, please 
            <a href="http://twitter.com/mohamedmansour">let me</a> know so I can
-           look into it.</p>
+           look into it. Remember, if you use no user interface (set it to None)
+           the only way to visit this page again is through Tools > Extensions.</p>
         <dl>
           <dt>User interface:</dt>
           <dd>
             <select id="user_interface">
               <option value="newtab">New tab page</option>
+              <option value="none">None</option>
               <option value="overlay">Overlay (experimental)</option>
             </select>
+            <span class="note" id="user_interface_note"></span>
           </dd>
           <dt>Default position:</dt>
           <dd>

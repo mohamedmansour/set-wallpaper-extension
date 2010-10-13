@@ -2,7 +2,7 @@
 <html>
 <embed type="application/x-vnd-set-wallpaper" id="pluginobj" 
        width="0" height="0" />
-       
+<script type='text/javascript' src='/js/position_enum.js'></script>
 <script>
 
 // Settings.
@@ -61,9 +61,10 @@ function getVersion() {
  * @param {Object<Tab>} tab The tab that it was triggered.
  */
 function onImage(info, tab) {
-  var index = tab.index + 1;
-  
-  if (settings.user_interface == 'overlay') {
+  if (settings.user_interface == 'none') {
+    plugin.setWallpaper(info.srcUrl, PositionEnum.valueOf(settings.position));
+  }
+  else if (settings.user_interface == 'overlay') {
     chrome.tabs.insertCSS(tab.id, {file: '/css/overlay.css'});
     chrome.tabs.executeScript(tab.id, {file: '/js/shared.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/position_enum.js'});
@@ -80,6 +81,7 @@ function onImage(info, tab) {
     });
   }
   else {
+    var index = tab.index + 1;
     chrome.tabs.create({url: 'preview.html', index: index}, function(newtab) {
       chrome.tabs.sendRequest(newtab.id, {
         method: 'SetImage',
