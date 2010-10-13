@@ -35,6 +35,13 @@ settings = {
   set position(val) {
     localStorage['position'] = val;
   },
+  get opt_out() {
+    var key = localStorage['opt_out'];
+    return (typeof key == 'undefined') ? false : key === 'true';
+  },
+  set opt_out(val) {
+    localStorage['opt_out'] = val;
+  },
 };
 
 // Plugin.
@@ -113,6 +120,23 @@ function openSingletonPage(url) {
     });
   });
 }
+
+/**
+ * Hook for installation.
+ */
+function onInstall() {
+}
+
+/**
+ * Hook for updates.
+ */
+function onUpdate() {
+  // Do not send updates if the user is opt'd out!
+  if (!settings.opt_out) {
+    chrome.tabs.create({url: 'updates.html'});
+  }
+}
+
 /**
  * Initialization routine.
  */
@@ -122,12 +146,17 @@ function init() {
   var currVersion = getVersion();
   var prevVersion = settings.version
   if (currVersion != prevVersion) {
-    // Check if we just installed this extension.
-    if (typeof prevVersion == 'undefined') {
-      // Do nothing now.
-    }
     // Update the version incase we want to do something in future.
     settings.version = currVersion;
+    
+    // Check if we just installed this extension.
+    if (typeof prevVersion == 'undefined') {
+      onInstall();
+      return;
+    }
+    
+    // On Update.
+    onUpdate();
   }
   
   // Sets the debugger according to the settings. 

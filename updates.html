@@ -1,0 +1,78 @@
+<!DOCTYPE html> 
+<html>
+<head>
+<title>Set Wallpaper Updated!</title>
+<link rel="stylesheet" type="text/css" href="/css/options.css">
+<script type="text/javascript">
+var bkg = chrome.extension.getBackgroundPage();
+  
+/**
+ *  Displays version on the screen.
+ */
+function displayVersion() {
+  document.getElementById('version').innerHTML = ' (v' + bkg.settings.version + ')';
+}
+
+/**
+ * View options screen.
+ */
+function viewOptions() {
+  bkg.openSingletonPage(chrome.extension.getURL('options.html'));
+}
+</script>
+</head>
+
+<body onload="displayVersion()"> 
+  <form onsubmit="return false;">
+  <div id="body-container">
+    <div id="header">
+      <h1>Set Wallpaper Updated!<em id="version"></em></h1>
+    </div>
+    <p>
+      This message only exists to notify you when brand new features exists, if 
+      you wish to <strong>opt-out</strong>, please visit 
+      <a href="#" onclick="viewOptions()">options</a> and disable <strong>notify
+      new features</strong> from one of the items.
+    </p>
+    <div class="extension-template">
+      <div class="extension-header">What's new?</div>
+      <div class="extension-options">
+        <ul>
+          <li>Adds a new user interface, which is 'None' to options. Allows you to automatically set the wallpaper without the preview. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/5">issue5</a></li>
+          <li>You can now set a default position (Tile / Stretch / Center) in options. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/4">issue4</a></li>
+          <li>Update icons to images that are legally allowed. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/3">issue3</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="extension-template">
+      <div class="extension-header">Bug fixes</div>
+      <div class="extension-options">
+        <ul>
+          <li>None (Found any bugs? Please report it
+            <a href="http://groups.google.com/group/mohamedmansour-extensions">here</a>.)
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="extension-template">
+      <div class="extension-header">Pending feature requests</div>
+      <div class="extension-options">
+        <ul>
+          <li>None (Have any nice features you would like to have? Please submit them
+            <a href="http://groups.google.com/group/mohamedmansour-extensions">here</a>.)
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div id="extension-footer">
+      <button onclick="window.close();">Close</button>
+    </div>
+    <div id="credits">
+      Extension developed by <a href="http://www.mohamedmansour.com">Mohamed Mansour</a>, 
+      Source Code available in <a href="http://github.com/mohamedmansour/set-wallpaper-extension">GitHub</a><br/>
+      Follow me on Twitter <a href="http://twitter.com/mohamedmansour">@mohamedmansour</a>
+    </div>
+  </div>
+  </form>
+</body>
+</html>
