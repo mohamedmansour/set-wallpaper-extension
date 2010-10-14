@@ -26,7 +26,7 @@ var text = '' +
 '  <div id="crx_wlp_area">' +
 '    <div id="crx_wlp_preview">' +
 '      <h1>Set Desktop Wallpaper</h1>' +
-'      <canvas id="crx_wlp_canvas" width="540" height="304" ></canvas>' +
+'      <canvas id="crx_wlp_canvas" width="500" height="375" ></canvas>' +
 '      <div id="options">' +
 '        <ul>' +
 '          <li id="crx_wlp_stretchButton">Stretch</li>' +

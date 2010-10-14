@@ -90,6 +90,8 @@ WallpaperPreview.prototype.setCanvasBackground = function(hex)
 WallpaperPreview.prototype._loadComplete = function()
 {
   this.screenDimension = new Dimension(screen.width, screen.height);
+  this.canvas.height = this.canvas.width / (this.screenDimension.width /
+      this.screenDimension.height);
   this.canvasDimension = new Dimension(this.canvas.width, this.canvas.height);
   this.imageDimension = new Dimension(this.imageBuffer.width,
                                        this.imageBuffer.height);
