@@ -37,7 +37,7 @@ settings = {
   },
   get opt_out() {
     var key = localStorage['opt_out'];
-    return (typeof key == 'undefined') ? false : key === 'true';
+    return (typeof key == 'undefined') ? true : key === 'true';
   },
   set opt_out(val) {
     localStorage['opt_out'] = val;
