@@ -45,7 +45,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Mohamed Mansour"
             VALUE "FileDescription", "NPAPI Plugin that sets an image as a wallpaper, copyright 2010 <a href=""http://mohamedmansour.com"">Mohamed Mansour</a>"
-            VALUE "FileOpenName", "TESTING - Set Wallpaper Plugin"
+            VALUE "FileOpenName", "Set Wallpaper Plugin"
             VALUE "FileVersion", "1, 0, 0, 0"
             VALUE "InternalName", "SetWallpaperPlugin"
             VALUE "LegalCopyright", "Copyright 2010 Mohamed Mansour."
