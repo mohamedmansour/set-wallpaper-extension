@@ -11,7 +11,9 @@
 PositionEnum = {
   CENTER  : 0,
   TILE    : 1,
-  STRETCH : 2
+  STRETCH : 2, 
+  FILL    : 3, /* Windows 7 and later only */
+  FIT     : 4  /* Windows 7 and later only */
 };
 
 /**

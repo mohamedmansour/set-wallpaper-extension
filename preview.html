@@ -20,6 +20,10 @@
               id="crx_wlp_tileButton">Tile</li>
           <li onClick="changeSelection(this, PositionEnum.CENTER);"
               id="crx_wlp_centerButton">Center</li>
+          <li onClick="changeSelection(this, PositionEnum.FILL);"
+              id="crx_wlp_fillButton" style="display:none;">Fill</li>
+          <li onClick="changeSelection(this, PositionEnum.FIT);"
+              id="crx_wlp_fitButton" style="display:none;">Fit</li>
         </ul>
       </div>
       <div id="crx_wlp_buttons">
@@ -40,12 +44,25 @@
 
   // Force images.
   document.getElementById('crx_wlp_stretchButton').style.backgroundImage =
-      'url(' + chrome.extension.getURL('/img/stretch.jpg') + ')';
+      'url(' + chrome.extension.getURL('/img/stretch.png') + ')';
   document.getElementById('crx_wlp_tileButton').style.backgroundImage =
-      'url(' + chrome.extension.getURL('/img/tile.jpg') + ')';
+      'url(' + chrome.extension.getURL('/img/tile.png') + ')';
   document.getElementById('crx_wlp_centerButton').style.backgroundImage =
-      'url(' + chrome.extension.getURL('/img/center.jpg') + ')';
+      'url(' + chrome.extension.getURL('/img/center.png') + ')';
       
+  // Lets add Win7 specific positions and icons.
+  var isWin7 = bkg.isWindows7();
+  if (isWin7) {
+    var fillButton = document.getElementById('crx_wlp_fillButton');
+    var fitButton = document.getElementById('crx_wlp_fitButton');
+    fillButton.style.display = 'inline-block';
+    fillButton.style.backgroundImage =
+        'url(' + chrome.extension.getURL('/img/fill.png') + ')';
+    fitButton.style.display = 'inline-block';
+    fitButton.style.backgroundImage =
+        'url(' + chrome.extension.getURL('/img/fit.png') + ')';
+  }
+  
   /**
    * Change the selection of the wallpaper style.
    * @param {HTMLElement} dom The current list item.

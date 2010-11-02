@@ -32,6 +32,8 @@ var text = '' +
 '          <li id="crx_wlp_stretchButton">Stretch</li>' +
 '          <li id="crx_wlp_tileButton">Tile</li>' +
 '          <li id="crx_wlp_centerButton">Center</li>' +
+'          <li id="crx_wlp_fillButton" style="display:none">Fill</li>' +
+'          <li id="crx_wlp_fitButton" style="display:none">Fit</li>' +
 '        </ul>' +
 '      </div>' +
 '      <div id="crx_wlp_buttons">' +
@@ -77,36 +79,75 @@ document.getElementById('crx_wlp_getOptions').addEventListener('click', function
 var stretchButton = document.getElementById('crx_wlp_stretchButton');
 var tileButton = document.getElementById('crx_wlp_tileButton');
 var centerButton = document.getElementById('crx_wlp_centerButton');
+var fillButton = document.getElementById('crx_wlp_fillButton');
+var fitButton = document.getElementById('crx_wlp_fitButton');
 
 // Stretch.
 stretchButton.style.backgroundImage =
-    'url(' + chrome.extension.getURL('/img/stretch.jpg') + ')';
+    'url(' + chrome.extension.getURL('/img/stretch.png') + ')';
 stretchButton.addEventListener('click', function(e) {
   stretchButton.className = 'selected';
   tileButton.className = '';
   centerButton.className = '';
+  fillButton.className = '';
+  fitButton.className = '';
   preview.render(PositionEnum.STRETCH);
 }, false);
 
 // Tile.
 tileButton.style.backgroundImage = 
-    'url(' + chrome.extension.getURL('/img/tile.jpg') + ')';
+    'url(' + chrome.extension.getURL('/img/tile.png') + ')';
 tileButton.addEventListener('click', function(e) {
   stretchButton.className = '';
   tileButton.className = 'selected';
   centerButton.className = '';
+  fillButton.className = '';
+  fitButton.className = '';
   preview.render(PositionEnum.TILE);
 }, false);
 
 // Center.
 centerButton.style.backgroundImage = 
-    'url(' + chrome.extension.getURL('/img/center.jpg') + ')';
+    'url(' + chrome.extension.getURL('/img/center.png') + ')';
 centerButton.addEventListener('click', function(e) {
   stretchButton.className = '';
   tileButton.className = '';
   centerButton.className = 'selected';
+  fillButton.className = '';
+  fitButton.className = '';
   preview.render(PositionEnum.CENTER);
 }, false);
+
+
+// Lets add Win7 specific positions.
+function setupWindows7Components() {
+  fillButton.style.display = 'inline-block';
+  fitButton.style.display = 'inline-block';
+
+  // Fill.
+  fillButton.style.backgroundImage = 
+      'url(' + chrome.extension.getURL('/img/fill.png') + ')';
+  fillButton.addEventListener('click', function(e) {
+    stretchButton.className = '';
+    tileButton.className = '';
+    centerButton.className = '';
+    fillButton.className = 'selected';
+    fitButton.className = '';
+    preview.render(PositionEnum.FILL);
+  }, false);
+
+  // Fit.
+  fitButton.style.backgroundImage = 
+      'url(' + chrome.extension.getURL('/img/fit.png') + ')';
+  fitButton.addEventListener('click', function(e) {
+    stretchButton.className = '';
+    tileButton.className = '';
+    centerButton.className = '';
+    fillButton.className = '';
+    fitButton.className = 'selected';
+    preview.render(PositionEnum.FIT);
+  }, false);
+}
 
 // Listen for extension requests.
 chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
@@ -121,6 +162,11 @@ chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
     // Set the appropriate item selected.
     var i = document.getElementById('crx_wlp_' + req.data.position + 'Button');
     i.className = 'selected';
+  }
+  else if (req.method = 'IsWindows7') {
+    if (req.data) {
+      setupWindows7Components();
+    }
   }
   sendResponse({});
 });

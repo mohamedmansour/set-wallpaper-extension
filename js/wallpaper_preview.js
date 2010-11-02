@@ -69,6 +69,12 @@ WallpaperPreview.prototype.render = function(position, opt_force)
     case PositionEnum.STRETCH:
       this._renderStretch();
       break;
+    case PositionEnum.FILL:
+      this._renderFill();
+      break;
+    case PositionEnum.FIT:
+      this._renderFit();
+      break;
   }
 };
 
@@ -103,7 +109,8 @@ WallpaperPreview.prototype._loadComplete = function()
 };
 
 /**
- * Stretch Renderer, renderers the buffered image on everything visible.
+ * Stretch Renderer, Stretch the image to cover the full screen. This can result
+ * in distortion of the image as the image's aspect ratio is not retained.
  * @private
  */
 WallpaperPreview.prototype._renderStretch = function() 
@@ -113,7 +120,9 @@ WallpaperPreview.prototype._renderStretch = function()
 };
 
 /**
- * Center Renderer, renderers the buffered image in the absolute center.
+ * Center Renderer, Center the wallpaper image in its original size, filling the
+ * remaining area with a solid background color if image is smaller than screen
+ * or cropping image if image is larger.
  * @private
  */
 WallpaperPreview.prototype._renderCenter = function()  
@@ -131,7 +140,8 @@ WallpaperPreview.prototype._renderCenter = function()
 };
 
 /**
- * Tile Renderer, renderers the buffered image in a tile, side by side.
+ * Tile Renderer, Tile the wallpaper image, starting in the upper left corner of
+ * the screen. This uses the image in its original size.
  * @private
  */
 WallpaperPreview.prototype._renderTile = function() 
@@ -152,6 +162,36 @@ WallpaperPreview.prototype._renderTile = function()
       this._paint(x, y, width, height);
     }
   }
+};
+
+/**
+ * Fill Renderer, Enlarge or shrink the image to fill the screen, retaining the
+ * aspect ratio of the original image. If necessary, the image is padded either
+ * on the top and bottom or on the right and left with the background color to
+ * fill any screen area not covered by the image.
+ * @private
+ */
+WallpaperPreview.prototype._renderFill = function() 
+{
+  this.position = PositionEnum.FILL;
+  
+  // TODO(mohamed): Create a fill renderer.
+  this._paint(0, 0, this.canvasDimension.width, this.canvasDimension.height);
+};
+
+/**
+ * Stretch Renderer, Enlarge or shrink the image to fill the screen, retaining
+ * the aspect ratio of the original image. If necessary, the image is cropped
+ * either on the top and bottom or on the left and right as necessary to fit the
+ * screen.
+ * @private
+ */
+WallpaperPreview.prototype._renderFit = function() 
+{
+  this.position = PositionEnum.FIT;
+  
+  // TODO(mohamed): Create a fit renderer.
+  this._paint(0, 0, this.canvasDimension.width, this.canvasDimension.height);
 };
 
 /**

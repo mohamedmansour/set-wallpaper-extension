@@ -46,6 +46,22 @@ settings = {
 
 // Plugin.
 plugin = document.getElementById('pluginobj');
+win7 = null;
+
+/**
+ * Lets check if we are currently on Windows7 since we have new properties
+ * to expose.
+ *
+ * @returns {boolean} True if operating system is indeed running on windows 7.
+ */
+function isWindows7() {
+  if (win7 == null) {
+    var re = /Windows\sNT\s([\d\.]+)/;
+    var match_array = navigator.appVersion.match(re);
+    win7 = match_array[1] >= 6.1;
+  }
+  return win7;
+}
 
 /**
  * Get the version number from the manifest.
@@ -78,6 +94,10 @@ function onImage(info, tab) {
     chrome.tabs.executeScript(tab.id, {file: '/js/dimension.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/wallpaper_preview.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/overlay.js'}, function() {
+      chrome.tabs.sendRequest(tab.id, {
+        method: 'IsWindows7',
+        data: isWindows7() 
+      });
       chrome.tabs.sendRequest(tab.id, {
         method: 'SetImage',
         data: {

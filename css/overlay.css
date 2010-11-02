@@ -56,20 +56,15 @@
   text-align: center;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_stretchButton {
+#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_stretchButton,
+#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_tileButton,
+#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_centerButton,
+#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_fitButton,
+#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_fillButton {
   background-repeat: no-repeat;
   background-position: 10px 8px;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_tileButton {
-  background-repeat: no-repeat;
-  background-position: 10px 8px;
-}
-
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_centerButton {
-  background-repeat: no-repeat;
-  background-position: 10px 8px;
-}
 
 #fnpmapejgepknmmkciiclcloomblhopm .crx_wlp_button,
 #fnpmapejgepknmmkciiclcloomblhopm .crx_wlp_button:visited {
@@ -122,9 +117,9 @@
 
 #fnpmapejgepknmmkciiclcloomblhopm ul li {
   cursor: pointer;
-  height: 57px;
+  height: 40px;
   display: inline-block;
-  line-height: 57px;
+  line-height: 40px;
   width: 75px;
   color: #fff;
   padding: 10px 0px 10px 90px;
