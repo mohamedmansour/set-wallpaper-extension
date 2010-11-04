@@ -32,17 +32,39 @@ function restoreOptions() {
   // Restore settings.
   document.getElementById('version').innerHTML = ' (v' + bkg.settings.version + ')';
   document.getElementById('debug').checked = bkg.settings.debug;
-  document.getElementById('position').value = bkg.settings.position;
-  var user_interface = document.getElementById('user_interface');
-  user_interface.value = bkg.settings.user_interface;
   document.getElementById('opt_out').checked = bkg.settings.opt_out;
   
-  // Add couple of listeners.
-  user_interface.addEventListener('change', function(e) {
+  // Add different positions.
+  var positionElement = document.getElementById('position')
+  positionElement.add(createPositionOption('Stretch'));
+  positionElement.add(createPositionOption('Center'));
+  positionElement.add(createPositionOption('Tile'));
+  if (bkg.isWindows7()) {
+    positionElement.add(createPositionOption('Fill'));
+    positionElement.add(createPositionOption('Fit'));
+  }
+  document.getElementById('position').value = bkg.settings.position;
+  
+  // Restore the user interface options and its note.
+  var userInterfaceElement = document.getElementById('user_interface');
+  userInterfaceElement.value = bkg.settings.user_interface;
+  userInterfaceElement.addEventListener('change', function(e) {
     var value = this.options[this.selectedIndex].value;
     setUserInterfaceNote(value);
   }, false);
   setUserInterfaceNote(bkg.settings.user_interface);
+}
+
+/**
+ * Create Position Option
+ * @param {string} name The name of the element.
+ * @returns {HTMLElement} The option.
+ */
+function createPositionOption(name) {
+  var option = document.createElement('option');
+  option.text = name;
+  option.value = name.toLowerCase();
+  return option;
 }
 
 /**
@@ -52,14 +74,18 @@ function restoreOptions() {
  * @param {string} type The type of message that needs to change.
  */
 function setUserInterfaceNote(type) {
+  console.log(type);
   var message = 'Error, type does not exist.';
-  if (type == 'overlay')
+  if (type == 'overlay') {
     message = 'Creates an overlay preview within the tab itself.';
-  else if (type == 'none')
+  }
+  else if (type == 'none') {
     message = 'No preview, automatically sets the wallpaper with the default ' +
               'position.';
-  else if (type == 'newtab')
+  }
+  else if (type == 'newtab') {
     message = 'A new tab page will open with the wallpaper preview screen.';
+  }
   document.getElementById('user_interface_note').innerHTML = message;
 }
 </script>
@@ -102,11 +128,7 @@ function setUserInterfaceNote(type) {
           </dd>
           <dt>Default position:</dt>
           <dd>
-            <select id="position">
-              <option value="stretch">Stretch</option>
-              <option value="center">Center</option>
-              <option value="tile">Tile</option>
-            </select>
+            <select id="position"></select>
           </dd>
           <dt>Opt-Out of future notifications:</dt>
           <dd>
