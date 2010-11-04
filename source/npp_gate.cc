@@ -32,7 +32,7 @@ NPError NPP_New(NPMIMEType mime_type,
   }
 
   DesktopService* desktop_service =
-      new(std::nothrow) DesktopService(instance, GetNetscapeFuncs());
+      new(std::nothrow) DesktopService(instance);
   if (desktop_service == NULL) {
     return NPERR_OUT_OF_MEMORY_ERROR;
   }

@@ -36,11 +36,11 @@ ScriptingBridge::~ScriptingBridge() {
 }
 
 // Sets up method_table and property_table.
-bool ScriptingBridge::InitializeIdentifiers(NPNetscapeFuncs* npfuncs) {
-  id_system_color = npfuncs->getstringidentifier("systemColor");
-  id_style = npfuncs->getstringidentifier("wallpaperStyle");
-  id_wallaper = npfuncs->getstringidentifier("setWallpaper");
-  id_debug = npfuncs->getstringidentifier("debug");
+bool ScriptingBridge::InitializeIdentifiers() {
+  id_system_color = NPN_GetStringIdentifier("systemColor");
+  id_style = NPN_GetStringIdentifier("wallpaperStyle");
+  id_wallaper = NPN_GetStringIdentifier("setWallpaper");
+  id_debug = NPN_GetStringIdentifier("debug");
 
   method_table =
       new(std::nothrow) std::map<NPIdentifier, MethodSelector>;

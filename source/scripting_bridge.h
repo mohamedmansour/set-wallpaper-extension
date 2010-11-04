@@ -42,7 +42,7 @@ class ScriptingBridge : public NPObject {
   virtual bool RemoveProperty(NPIdentifier name);
 
   // Initializes all the bridge identifiers from JavaScript land.
-  static bool InitializeIdentifiers(NPNetscapeFuncs* npfuncs);
+  static bool InitializeIdentifiers();
 
   static NPClass np_class;
 

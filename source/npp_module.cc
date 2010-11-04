@@ -5,13 +5,7 @@
 #include <npapi.h>
 #include <npfunctions.h>
 
-// NPAPI extensions.
-static NPNetscapeFuncs* npnfuncs = NULL;
-
-
-NPNetscapeFuncs* GetNetscapeFuncs() {
-  return npnfuncs;
-}
+extern NPNetscapeFuncs* npnfuncs;
 
 extern "C" {
 // When the browser calls NP_Initialize the plugin needs to return a list

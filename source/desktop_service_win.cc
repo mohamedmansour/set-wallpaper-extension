@@ -16,31 +16,30 @@ using desktop_service::ScriptingBridge;
 
 namespace desktop_service {
 
-DesktopService::DesktopService(NPP npp, NPNetscapeFuncs* npfuncs)
+DesktopService::DesktopService(NPP npp)
     : npp_(npp),
       scriptable_object_(NULL),
-      npfuncs_(npfuncs),
       debug_(false) {
-  ScriptingBridge::InitializeIdentifiers(npfuncs);
+  ScriptingBridge::InitializeIdentifiers();
 }
 
 DesktopService::~DesktopService() {
   if (scriptable_object_)
-    npfuncs_->releaseobject(scriptable_object_);
+    NPN_ReleaseObject(scriptable_object_);
 }
 
 NPObject* DesktopService::GetScriptableObject() {
-  if (scriptable_object_ == NULL) {
-    scriptable_object_ =
-        npfuncs_->createobject(npp_, &ScriptingBridge::np_class);
-  }
+  if (scriptable_object_ == NULL)
+    scriptable_object_ = NPN_CreateObject(npp_, &ScriptingBridge::np_class);
+
   if (scriptable_object_)
-    npfuncs_->retainobject(scriptable_object_);
+    NPN_RetainObject(scriptable_object_);
+
   return scriptable_object_;
 }
 
 bool DesktopService::GetSystemColor(NPVariant* result) {
-  char* hex_color = (char*) npfuncs_->memalloc(7);
+  char* hex_color = (char*) NPN_MemAlloc(7);
   DWORD color = GetSysColor(1);
   sprintf(hex_color, "%02X%02X%02X", GetRValue(color), GetGValue(color),
           GetBValue(color));
@@ -68,7 +67,7 @@ bool DesktopService::SetWallpaper(NPVariant* result,
   // Download the image to the cache so we can set it as a wallpaper.
   // TODO(mohamed): Figure out a way to extract image from Chrome's cache.
   wchar_t* cache_temp_path =
-      (wchar_t*) npfuncs_->memalloc(MAX_PATH * sizeof(wchar_t));
+      (wchar_t*) NPN_MemAlloc(MAX_PATH * sizeof(wchar_t));
   HRESULT hr = URLDownloadToCacheFile(NULL, image_url.c_str(),
                                       cache_temp_path, MAX_PATH,
                                       0, NULL);
@@ -78,9 +77,9 @@ bool DesktopService::SetWallpaper(NPVariant* result,
     char error_message[35];
     sprintf(error_message, "SetWallpaper::Download::Error %04d", 
             GetLastError());
-    npfuncs_->setexception(scriptable_object_, error_message);
+    NPN_SetException(scriptable_object_, error_message);
     SendConsole(error_message);
-    npfuncs_->memfree(cache_temp_path);
+    NPN_MemFree(cache_temp_path);
     return false;
   }
 
@@ -119,12 +118,12 @@ bool DesktopService::SetWallpaper(NPVariant* result,
     sprintf(error_message, "SetWallpaper::Apply::Error %04d", 
             GetLastError());
     SendConsole(error_message);
-    npfuncs_->setexception(scriptable_object_, error_message);
+    NPN_SetException(scriptable_object_, error_message);
   }
 
   // Cleanup.
   CoUninitialize();;
-  npfuncs_->memfree(cache_temp_path);
+  NPN_MemFree(cache_temp_path);
   SendConsole("SetWallpaper::DONE succeeded!");
   return SUCCEEDED(hr);
 }
@@ -135,31 +134,31 @@ void DesktopService::SendConsole(const char* message) {
 
   // Get window object.
   NPObject* window = NULL;
-  npfuncs_->getvalue(npp_, NPNVWindowNPObject, &window);
+  NPN_GetValue(npp_, NPNVWindowNPObject, &window);
 
   // Get console object.
   NPVariant consoleVar;
-  NPIdentifier id = npfuncs_->getstringidentifier("console");
-  npfuncs_->getproperty(npp_, window, id, &consoleVar);
+  NPIdentifier id = NPN_GetStringIdentifier("console");
+  NPN_GetProperty(npp_, window, id, &consoleVar);
   NPObject* console = NPVARIANT_TO_OBJECT(consoleVar);
 
   // Get the debug object.
-  id = npfuncs_->getstringidentifier("debug");
+  id = NPN_GetStringIdentifier("debug");
 
   // Invoke the call with the message!
   NPVariant type;
   STRINGZ_TO_NPVARIANT(message, type);
   NPVariant args[] = { type };
   NPVariant voidResponse;
-  npfuncs_->invoke(npp_, console, id, args,
-                   sizeof(args) / sizeof(args[0]),
-                   &voidResponse);
+  NPN_Invoke(npp_, console, id, args,
+             sizeof(args) / sizeof(args[0]),
+             &voidResponse);
 
   // Cleanup all allocated objects, otherwise, reference count and
   // memory leaks will happen.
-  npfuncs_->releaseobject(window);
-  npfuncs_->releasevariantvalue(&consoleVar);
-  npfuncs_->releasevariantvalue(&voidResponse);
+  NPN_ReleaseObject(window);
+  NPN_ReleaseVariantValue(&consoleVar);
+  NPN_ReleaseVariantValue(&voidResponse);
 }
 
 }  // namespace desktop_service

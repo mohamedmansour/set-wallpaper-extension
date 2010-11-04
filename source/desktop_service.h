@@ -12,7 +12,7 @@ namespace desktop_service {
 
 class DesktopService {
  public:
-  DesktopService(NPP npp, NPNetscapeFuncs* npfuncs);
+  DesktopService(NPP npp);
   ~DesktopService();
 
   NPObject* GetScriptableObject();
@@ -30,7 +30,6 @@ class DesktopService {
  private:
   NPP npp_;
   NPObject* scriptable_object_;
-  NPNetscapeFuncs* npfuncs_;
   bool debug_;
 };
 
