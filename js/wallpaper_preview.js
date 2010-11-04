@@ -180,7 +180,7 @@ WallpaperPreview.prototype._renderFill = function()
 };
 
 /**
- * Stretch Renderer, Enlarge or shrink the image to fill the screen, retaining
+ * Fit Renderer, Enlarge or shrink the image to fill the screen, retaining
  * the aspect ratio of the original image. If necessary, the image is cropped
  * either on the top and bottom or on the left and right as necessary to fit the
  * screen.
@@ -189,9 +189,44 @@ WallpaperPreview.prototype._renderFill = function()
 WallpaperPreview.prototype._renderFit = function() 
 {
   this.position = PositionEnum.FIT;
+
+  // Scale the dimensions while constraining proportions.
+  var width = this.imageDimension.width / this.factor.width;
+  var height = this.imageDimension.height / this.factor.height;
   
-  // TODO(mohamed): Create a fit renderer.
-  this._paint(0, 0, this.canvasDimension.width, this.canvasDimension.height);
+  // Lets check if it needs to enlarge or shrink.
+  if (width < this.canvasDimension.width &&
+      height < this.canvasDimension.height) { 
+    // Enlarging.
+    var widthDiff = this.canvasDimension.width - width;
+    var heightDiff = this.canvasDimension.height - height;
+    if (widthDiff > heightDiff) {
+      width = (width * this.canvasDimension.height) / height;
+      height = this.canvasDimension.height;
+    }
+    else {
+      height = (height * this.canvasDimension.width) / width;
+      width = this.canvasDimension.width;
+    }
+  }
+  else {
+    // Shrinking.
+    var widthDiff = width - this.canvasDimension.width;
+    var heightDiff = height - this.canvasDimension.height;
+    if (widthDiff > heightDiff) {
+      height = (height * this.canvasDimension.width) / width;
+      width = this.canvasDimension.width;
+    }
+    else {
+      width = (width * this.canvasDimension.height) / height;
+      height = this.canvasDimension.height;
+    }
+  }
+  
+  // Move the wallpaper to the center.
+  var x = (this.canvasDimension.width - width) / 2;
+  var y = (this.canvasDimension.height - height) / 2;
+  this._paint(x, y, width, height);
 };
 
 /**
@@ -205,4 +240,19 @@ WallpaperPreview.prototype._renderFit = function()
 WallpaperPreview.prototype._paint = function(x, y, width, height) 
 {
   this.ctx.drawImage(this.imageBuffer, x, y, width, height);
+};
+
+/**
+ * Using Euclidean algorithm, we can find an efficient way computing the 
+ * greatest common divisor (GCD).
+ * @param {number} a The first number.
+ * @param {number} b The second number.
+ * @returns {number} The gcd.
+ */
+WallpaperPreview.prototype._greatestCommonDivisor = function(a, b)
+{
+  if (b === 0) {
+    return a;
+  }
+  return this._greatestCommonDivisor(b, a % b);
 };
