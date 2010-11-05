@@ -112,6 +112,11 @@
       var i = document.getElementById('crx_wlp_' + req.data.position + 'Button');
       i.className = 'selected';
     }
+    else if (req.method == 'SetBackground') {
+      console.debug(req.data.image);
+      var bkgrd = document.getElementsByTagName('body')[0];
+      bkgrd.style.backgroundImage = "url("+req.data.image+")";
+    }
     sendResponse({});
   });
   </script>

@@ -108,14 +108,22 @@ function onImage(info, tab) {
     });
   }
   else {
-    var index = tab.index + 1;
-    chrome.tabs.create({url: 'preview.html', index: index}, function(newtab) {
-      chrome.tabs.sendRequest(newtab.id, {
-        method: 'SetImage',
-        data: {
-          image: info.srcUrl,
-          position: settings.position
-        }
+    chrome.tabs.captureVisibleTab(null, {quality: 10}, function(dataUrl) {
+      var index = tab.index + 1;
+      chrome.tabs.create({url: 'preview.html', index: index}, function(newtab) {
+        chrome.tabs.sendRequest(newtab.id, {
+          method: 'SetBackground',
+          data: {
+            image: dataUrl
+          }
+        });
+        chrome.tabs.sendRequest(newtab.id, {
+          method: 'SetImage',
+          data: {
+            image: info.srcUrl,
+            position: settings.position
+          }
+        });
       });
     });
   }
