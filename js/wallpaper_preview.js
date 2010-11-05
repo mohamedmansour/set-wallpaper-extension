@@ -175,8 +175,45 @@ WallpaperPreview.prototype._renderFill = function()
 {
   this.position = PositionEnum.FILL;
   
-  // TODO(mohamed): Create a fill renderer.
-  this._paint(0, 0, this.canvasDimension.width, this.canvasDimension.height);
+  // Scale the dimensions while constraining proportions.
+  var width = this.imageDimension.width / this.factor.width;
+  var height = this.imageDimension.height / this.factor.height;
+  
+  // Lets check if it needs to enlarge or shrink.
+  if (width < this.canvasDimension.width &&
+      height < this.canvasDimension.height) { 
+    // Enlarging.
+    var widthDiff = this.canvasDimension.width - width;
+    var heightDiff = this.canvasDimension.height - height;
+    // Enlarging till the smaller side.
+    if (widthDiff < heightDiff) {
+      width = (width * this.canvasDimension.height) / height;
+      height = this.canvasDimension.height;
+    }
+    else {
+      height = (height * this.canvasDimension.width) / width;
+      width = this.canvasDimension.width;
+    }
+  }
+  else {
+    // Shrinking.
+    var widthDiff = width - this.canvasDimension.width;
+    var heightDiff = height - this.canvasDimension.height;
+    // Shrinking till the smaller side.
+    if (widthDiff < heightDiff) {
+      height = (height * this.canvasDimension.width) / width;
+      width = this.canvasDimension.width;
+    }
+    else {
+      width = (width * this.canvasDimension.height) / height;
+      height = this.canvasDimension.height;
+    }
+  }
+  
+  // Move the wallpaper to the center.
+  var x = (this.canvasDimension.width - width) / 2;
+  var y = (this.canvasDimension.height - height) / 2;
+  this._paint(x, y, width, height);
 };
 
 /**
@@ -200,6 +237,7 @@ WallpaperPreview.prototype._renderFit = function()
     // Enlarging.
     var widthDiff = this.canvasDimension.width - width;
     var heightDiff = this.canvasDimension.height - height;
+    // Enlarging till the larger side.
     if (widthDiff > heightDiff) {
       width = (width * this.canvasDimension.height) / height;
       height = this.canvasDimension.height;
@@ -213,6 +251,7 @@ WallpaperPreview.prototype._renderFit = function()
     // Shrinking.
     var widthDiff = width - this.canvasDimension.width;
     var heightDiff = height - this.canvasDimension.height;
+    // Shrink till the larger side.
     if (widthDiff > heightDiff) {
       height = (height * this.canvasDimension.width) / width;
       width = this.canvasDimension.width;
