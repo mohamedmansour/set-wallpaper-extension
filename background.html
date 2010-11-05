@@ -199,11 +199,10 @@ function init() {
     // Check if we just installed this extension.
     if (typeof prevVersion == 'undefined') {
       onInstall();
-      return;
     }
-    
-    // On Update.
-    onUpdate();
+    else {
+      onUpdate();
+    }
   }
   
   // Sets the debugger according to the settings. 
