@@ -48,6 +48,11 @@ settings = {
 plugin = document.getElementById('pluginobj');
 win7 = null;
 
+// Keep track of the tab position for the previewer when opened.
+// So that it can close back to the original place.
+var currid = null;
+var newid = null;
+
 /**
  * Lets check if we are currently on Windows7 since we have new properties
  * to expose.
@@ -109,8 +114,10 @@ function onImage(info, tab) {
   }
   else {
     chrome.tabs.captureVisibleTab(null, {quality: 10}, function(dataUrl) {
+      currid = tab.id;
       var index = tab.index + 1;
       chrome.tabs.create({url: 'preview.html', index: index}, function(newtab) {
+        newid = newtab.id;
         chrome.tabs.sendRequest(newtab.id, {
           method: 'SetBackground',
           data: {
@@ -128,6 +135,18 @@ function onImage(info, tab) {
     });
   }
 }
+
+/**
+ * Listens on tab removals. So we can get back to the tab that just opened.
+ * If possible of course. Should handle moved tabs as well.
+ */
+chrome.tabs.onRemoved.addListener(function(tabId) {
+  if (newid && tabId == newid) {
+    chrome.tabs.update(currid, {selected: true})
+  } else {
+    newid = null; 
+  }
+});
 
 /**
  * Open a singleton page, which means, if a page already exists, it
