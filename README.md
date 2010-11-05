@@ -2,9 +2,9 @@ Set wallpaper extension
 =====================================
 
 This Google Chrome extension adds a context menu to every single image that
-allows you to set that image as a wallpaper (only valid for JPG, PNG, TIFF, and
-BMP images). It allows you to change the style of the wallpaper by simply
-pressing one of the TILE, CENTER, and STRETCH types.
+allows you to set that image as a wallpaper. It allows you to change the style
+of the wallpaper by simply pressing one of the TILE, CENTER, STRETCH, FILL, and
+FIT types.
 
 How does it work?
 ----------------
