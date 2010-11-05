@@ -241,18 +241,3 @@ WallpaperPreview.prototype._paint = function(x, y, width, height)
 {
   this.ctx.drawImage(this.imageBuffer, x, y, width, height);
 };
-
-/**
- * Using Euclidean algorithm, we can find an efficient way computing the 
- * greatest common divisor (GCD).
- * @param {number} a The first number.
- * @param {number} b The second number.
- * @returns {number} The gcd.
- */
-WallpaperPreview.prototype._greatestCommonDivisor = function(a, b)
-{
-  if (b === 0) {
-    return a;
-  }
-  return this._greatestCommonDivisor(b, a % b);
-};
