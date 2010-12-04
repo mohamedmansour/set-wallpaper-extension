@@ -27,5 +27,7 @@ for the plugin:
  
     app.debug = true;
 
+![Screenshot of the Chrome Extension](https://chrome.google.com/extensions/img/ddkmiidlgnkhnfhigdpadkaamogngkin/1288980317.71/screenshot/22002)
+
 
 Mohamed Mansour hello@mohamedmansour.com
