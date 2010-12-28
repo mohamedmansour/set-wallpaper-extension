@@ -1,12 +1,11 @@
 <!DOCTYPE html> 
 <html>
-<embed type="application/x-vnd-set-wallpaper" id="pluginobj" 
-       width="0" height="0" />
+<embed type="application/x-vnd-set-wallpaper" id="pluginobj" />
 <script type='text/javascript' src='/js/position_enum.js'></script>
 <script>
 
 // Settings.
-settings = {
+var settings = {
   get version() {
     return localStorage['version'];
   },
@@ -19,7 +18,7 @@ settings = {
   },
   set debug(val) {
     localStorage['debug'] = val;
-    plugin.debug = val;
+    getPlugin().debug = val;
   },
   get user_interface() {
     var key = localStorage['user_interface'];
@@ -44,14 +43,29 @@ settings = {
   },
 };
 
-// Plugin.
-plugin = document.getElementById('pluginobj');
-win7 = null;
-
 // Keep track of the tab position for the previewer when opened.
 // So that it can close back to the original place.
 var currid = null;
 var newid = null;
+
+// Keep track if the operating system is Windows 7. We do special stuff.
+var win7 = null;
+
+/**
+ * Get an instance of a guaranteed living plugin. If its dead (undefined) then
+ * bring it back from the dead by removing/adding it back to the DOM.
+ */
+function getPlugin() {
+  // Check if plugin somehow crashed, most likely due to some internal error.
+  // Lets just reload it since some images might work.
+  var plugin = document.getElementById('pluginobj');
+  if (plugin.debug == 'undefined') {
+    var parent = plugin.parentNode;;
+    parent.removeChild(plugin);
+    parent.appendChild(plugin);
+  }
+  return plugin;
+}
 
 /**
  * Lets check if we are currently on Windows7 since we have new properties
@@ -90,7 +104,7 @@ function getVersion() {
  */
 function onImage(info, tab) {
   if (settings.user_interface == 'none') {
-    plugin.setWallpaper(info.srcUrl, PositionEnum.valueOf(settings.position));
+    getPlugin().setWallpaper(info.srcUrl, PositionEnum.valueOf(settings.position));
   }
   else if (settings.user_interface == 'overlay') {
     chrome.tabs.insertCSS(tab.id, {file: '/css/overlay.css'});
@@ -206,7 +220,7 @@ function init() {
   }
   
   // Sets the debugger according to the settings. 
-  plugin.debug = settings.debug;
+  getPlugin().debug = settings.debug;
   
   // Install context menus on images.
   chrome.contextMenus.create({
@@ -217,11 +231,11 @@ function init() {
   
   chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
     if (req.method == 'SetWallpaper') {
-      plugin.setWallpaper(req.data.image, req.data.position);
+      getPlugin().setWallpaper(req.data.image, req.data.position);
       sendResponse({});
     }
     else if (req.method == 'GetSystemColor') {
-      sendResponse({color: plugin.systemColor()});
+      sendResponse({color: getPlugin().systemColor()});
     }
     else if (req.method == 'OpenOptions') {
       openSingletonPage(chrome.extension.getURL('/options.html'));
@@ -231,5 +245,6 @@ function init() {
 }
 
 
-init();</script>
+init();
+</script>
 </html>
