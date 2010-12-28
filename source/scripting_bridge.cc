@@ -108,13 +108,20 @@ bool ScriptingBridge::SetWallpaper(const NPVariant* args,
   const NPVariant styleArgument = args[1];
 
   // Verify the arguments, we don't want to deal with any casts here.
+  // Chrome has this weird bug http://crbug.com/68175 that doesn't like ints.
   if (pathArgument.type != NPVariantType_String || 
-      styleArgument.type != NPVariantType_Int32) {
+      (styleArgument.type != NPVariantType_Int32 &&
+       styleArgument.type != NPVariantType_Double)) {
     return false;
   }
 
   const NPString path = NPVARIANT_TO_STRING(pathArgument);
-  const int32_t style = NPVARIANT_TO_INT32(styleArgument);
+  int32_t style = 0;
+  if (styleArgument.type == NPVariantType_Int32)
+    style = NPVARIANT_TO_INT32(styleArgument);
+  else
+    style = (int32_t) NPVARIANT_TO_DOUBLE(styleArgument);
+
 
   DesktopService* desktop_service = static_cast<DesktopService*>(npp_->pdata);
   if (desktop_service)
