@@ -4,7 +4,7 @@
 <script type='text/javascript' src='/js/position_enum.js'></script>
 <script>
 
-// Settings.
+// Global localStorage persisted settings.
 var settings = {
   get version() {
     return localStorage['version'];
@@ -104,19 +104,31 @@ function getVersion() {
  */
 function onImage(info, tab) {
   if (settings.user_interface == 'none') {
+    // No interface present, just set the wallpaper directly with the
+    // stored position in options.
     getPlugin().setWallpaper(info.srcUrl, PositionEnum.valueOf(settings.position));
   }
   else if (settings.user_interface == 'overlay') {
+    // This is experimental overlay, that draws the overlay ontop of the current
+    // tab viewed. We need to inject all the contents for it to function
+    // correctly. Order matters here!
     chrome.tabs.insertCSS(tab.id, {file: '/css/overlay.css'});
     chrome.tabs.executeScript(tab.id, {file: '/js/shared.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/position_enum.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/dimension.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/wallpaper_preview.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/overlay.js'}, function() {
+      // Once the overlay.js file has been injected successfully, we will need
+      // to send different requests to that page/
+      
+      // Inform the tab wheter the current operating system is Windows 7.
+      // Extra features will be enabled such as FILL/FIT algorithms.
       chrome.tabs.sendRequest(tab.id, {
         method: 'IsWindows7',
         data: isWindows7() 
       });
+      
+      // Safely set the image for the previewer after everything has been loaded.
       chrome.tabs.sendRequest(tab.id, {
         method: 'SetImage',
         data: {
@@ -127,17 +139,35 @@ function onImage(info, tab) {
     });
   }
   else {
+    // To imitate the overlay feature of the experimental feature. We will
+    // capture a screenshot of the current tab, so that we can make the user
+    // feel that we are drawing an overlay. 
+    // The quality is set very low, which is still visible which will make the
+    // user not notice any lag.
     chrome.tabs.captureVisibleTab(null, {quality: 10}, function(dataUrl) {
+      // Save the current tab id, this is used to control navigation when tab
+      // closes, to make it go back to the parent it came from.
       currid = tab.id;
+      
+      // Opens the preview.html extension tab adjacent to it.
       var index = tab.index + 1;
       chrome.tabs.create({url: 'preview.html', index: index}, function(newtab) {
+        // When everything has been loaded, properly record the new tab it, so
+        // that we can use it to control navigation when tab moves to a different
+        // index.
         newid = newtab.id;
+        
+        // Transfer the background image to that tab to imitate a nice overlay
+        // clone. Adding this here, will ensure tab is loading features async.
         chrome.tabs.sendRequest(newtab.id, {
           method: 'SetBackground',
           data: {
             image: dataUrl
           }
         });
+      
+        // Safely set the image for the previewer after everything has been
+        // loaded.
         chrome.tabs.sendRequest(newtab.id, {
           method: 'SetImage',
           data: {
@@ -229,6 +259,9 @@ function init() {
     onclick: onImage
   });
   
+  // Extension request listener, called from content scripts and the extension
+  // pages, so we have one centralized location that we deal with Plugin related
+  // features.
   chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
     if (req.method == 'SetWallpaper') {
       getPlugin().setWallpaper(req.data.image, req.data.position);
