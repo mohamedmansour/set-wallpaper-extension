@@ -100,6 +100,7 @@
   
   // Listen for extension requests.
   chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
+    bkg.console.debug('Extension request received!' + req.method);
     if (req.method == 'SetImage') {
       // Startup the previewer to do its business!
       preview = new WallpaperPreview('crx_wlp_canvas', req.data.image,

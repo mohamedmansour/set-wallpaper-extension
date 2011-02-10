@@ -1,6 +1,6 @@
 {
   "name": "Set image as wallpaper (Windows)",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Set image as wallpaper in Windows. You can stretch, tile, center, fill, and fit.",
   "icons": {
     "16": "img/icon16.png",
@@ -8,9 +8,7 @@
     "64": "img/icon64.png",
     "128": "img/icon128.png"
   },
-  "plugins": [ 
-    { "path": "setwallpaper_plugin.dll", "public": true }
-  ],
+  "plugins": [{ "path": "setwallpaper_plugin.dll"}],
   "background_page": "background.html",
   "options_page": "options.html",
   "permissions": ["contextMenus", "tabs", "http://*/*", "https://*/*"]
