@@ -1,6 +1,10 @@
-// Copyright 2010 Mohamed Mansour. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can
-// be found in the LICENSE file.
+/**
+ * Short form for getting elements by id.
+ * @param {string} id The id.
+ */
+function $(id) {
+  return document.getElementById(id);
+}
 
 /**
  * Function extension for binding the current scope.

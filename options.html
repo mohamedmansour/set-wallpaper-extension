@@ -1,97 +1,12 @@
 <!DOCTYPE html> 
 <html>
 <head>
-<title>Set Wallpaper Options</title>
-<link rel="stylesheet" type="text/css" href="/css/options.css">
-<script type="text/javascript">
-var bkg = chrome.extension.getBackgroundPage();
-
-/**
-* Saves options to localStorage.
-*/
-function saveOptions() {
-  // Save settings.
-  bkg.settings.debug = document.getElementById('debug').checked;
-  bkg.settings.user_interface = document.getElementById('user_interface').value;
-  bkg.settings.position = document.getElementById('position').value;
-  bkg.settings.opt_out = document.getElementById('opt_out').checked;
-  
-  // Update status to let user know options were saved.
-  var info = document.getElementById('info-message');
-  info.style.display = 'inline';
-  info.style.opacity = 1;
-  setTimeout(function() {
-    info.style.opacity = 0.0;
-  }, 1000);
-}
-
-/**
-* Restore all options.
-*/
-function restoreOptions() {
-  // Restore settings.
-  document.getElementById('version').innerHTML = ' (v' + bkg.settings.version + ')';
-  document.getElementById('debug').checked = bkg.settings.debug;
-  document.getElementById('opt_out').checked = bkg.settings.opt_out;
-  
-  // Add different positions.
-  var positionElement = document.getElementById('position')
-  positionElement.add(createPositionOption('Stretch'));
-  positionElement.add(createPositionOption('Center'));
-  positionElement.add(createPositionOption('Tile'));
-  if (bkg.isWindows7()) {
-    positionElement.add(createPositionOption('Fill'));
-    positionElement.add(createPositionOption('Fit'));
-  }
-  document.getElementById('position').value = bkg.settings.position;
-  
-  // Restore the user interface options and its note.
-  var userInterfaceElement = document.getElementById('user_interface');
-  userInterfaceElement.value = bkg.settings.user_interface;
-  userInterfaceElement.addEventListener('change', function(e) {
-    var value = this.options[this.selectedIndex].value;
-    setUserInterfaceNote(value);
-  }, false);
-  setUserInterfaceNote(bkg.settings.user_interface);
-}
-
-/**
- * Create Position Option
- * @param {string} name The name of the element.
- * @returns {HTMLElement} The option.
- */
-function createPositionOption(name) {
-  var option = document.createElement('option');
-  option.text = name;
-  option.value = name.toLowerCase();
-  return option;
-}
-
-/**
- * Changes the note for the userinterface, to help and assist the user what
- * the options really mean.
- *
- * @param {string} type The type of message that needs to change.
- */
-function setUserInterfaceNote(type) {
-  console.log(type);
-  var message = 'Error, type does not exist.';
-  if (type == 'overlay') {
-    message = 'Creates an overlay preview within the tab itself.';
-  }
-  else if (type == 'none') {
-    message = 'No preview, automatically sets the wallpaper with the default ' +
-              'position.';
-  }
-  else if (type == 'newtab') {
-    message = 'A new tab page will open with the wallpaper preview screen.';
-  }
-  document.getElementById('user_interface_note').innerHTML = message;
-}
-</script>
+  <title>Set Wallpaper Options</title>
+  <link rel="stylesheet" type="text/css" href="/css/options.css">
+  <script type="text/javascript" src="/js/functions.js"></script>
+  <script type="text/javascript" src="/js/options.js"></script>
 </head>
-
-<body onload="restoreOptions()"> 
+<body> 
   <form onsubmit="return false;">
   <div id="body-container">
     <div id="header">
@@ -106,7 +21,8 @@ function setUserInterfaceNote(type) {
       <a
        href="http://groups.google.com/group/mohamedmansour-extensions">
        File bugs and suggestions
-      </a>
+      </a><br/><br/>
+      You should follow me on Twitter <a href="http://twitter.com/mohamedmansour">@mohamedmansour</a>
     </p>
     <div class="extension-template">
       <div class="extension-header">General</div>
@@ -154,13 +70,12 @@ function setUserInterfaceNote(type) {
     </div>
     <div id="extension-footer">
       <span id="info-message">Options saved!</span>
-      <button onclick="saveOptions();">Save</button>
-      <button onclick="window.close();">Close</button>
+      <button id="button-save">Save</button>
+      <button id="button-close">Close</button>
     </div>
     <div id="credits">
       Extension developed by <a href="http://www.mohamedmansour.com">Mohamed Mansour</a>, 
-      Source Code available in <a href="http://github.com/mohamedmansour/set-wallpaper-extension">GitHub</a><br/>
-      Follow me on Twitter <a href="http://twitter.com/mohamedmansour">@mohamedmansour</a>
+      Source Code available in <a href="http://github.com/mohamedmansour/set-wallpaper-extension">GitHub</a>
     </div>
   </div>
   </form>

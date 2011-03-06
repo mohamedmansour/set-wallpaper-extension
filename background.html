@@ -75,7 +75,7 @@ function onImage(info, tab) {
     // tab viewed. We need to inject all the contents for it to function
     // correctly. Order matters here!
     chrome.tabs.insertCSS(tab.id, {file: '/css/overlay.css'});
-    chrome.tabs.executeScript(tab.id, {file: '/js/shared.js'});
+    chrome.tabs.executeScript(tab.id, {file: '/js/functions.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/position_enum.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/dimension.js'});
     chrome.tabs.executeScript(tab.id, {file: '/js/wallpaper_preview.js'});
