@@ -27,6 +27,9 @@ class DesktopService {
   // Send debug messages to the background.html page within chrome.
   void SendConsole(const char* message);
 
+  // Send an error message to the console and to the chrome extension.
+  void SendError(const char* message);
+
  private:
   NPP npp_;
   NPObject* scriptable_object_;
