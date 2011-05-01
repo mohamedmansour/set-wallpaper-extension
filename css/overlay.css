@@ -15,24 +15,6 @@
   font-size: 13px;
 }
 
-#crx_wlp > div { 
-  padding:15px; 
-  margin: 0 auto; 
-}
-
-#crx_wlp canvas {
-  background-color: #2981e4;
-  border-radius: 5px;
-}
-
-#crx_wlp h1 {
-  margin: 0;
-  padding: 10px;
-  color: #fff;
-  text-shadow: 2px 2px 2px #000;
-  text-align: center;
-}
-
 #crx_wlp_area {
   -webkit-box-align: center;
   -webkit-box-pack: center;
@@ -45,12 +27,35 @@
   background: white;
   border: 1px solid #BCC1D0;
   border-radius: 20px;
-  padding: 0;
-  margin: 0 auto; 
+  margin: 0 auto;
+}
+
+#crx_wlp_preview h1 {
+  margin: 0;
+  padding: 10px;
+  text-shadow: 2px 2px 2px #000;
+  text-align: center;
+}
+
+#crx_wlp_canvas {
+  background-color: #2981e4;
+  border-radius: 5px;
+  display: block;
+  margin: 0 auto;
 }
 
 #crx_wlp_options {
   padding-top: 10px;
+  text-align: center;
+}
+
+#crx_wlp_stretchButton,
+#crx_wlp_tileButton,
+#crx_wlp_centerButton,
+#crx_wlp_fitButton,
+#crx_wlp_fillButton {
+  background-repeat: no-repeat;
+  background-position: 10px 8px;
 }
 
 #crx_wlp_stretchButton {
@@ -76,15 +81,6 @@
 #crx_wlp #crx_wlp_buttons {
   padding: 20px;
   text-align: center;
-}
-
-#crx_wlp_stretchButton,
-#crx_wlp_tileButton,
-#crx_wlp_centerButton,
-#crx_wlp_fitButton,
-#crx_wlp_fillButton {
-  background-repeat: no-repeat;
-  background-position: 10px 8px;
 }
 
 .crx_wlp_button,
@@ -131,38 +127,40 @@
   background-color: #d45500;
 }
 
-#crx_wlp ul {
+#crx_wlp_options ul {
   margin: 0;
   padding: 0;
 }
 
-#crx_wlp ul li {
+#crx_wlp_options ul li {
   cursor: pointer;
   height: 40px;
   display: inline-block;
   line-height: 40px;
   width: 75px;
-  color: #fff;
+  color: #000;
   padding: 10px 0px 10px 90px;
+  margin: 5px 0;
+  background-color: #eee;
+  border-radius: 15px;
 }
 
-#crx_wlp ul li.selected {
+#crx_wlp_options ul li.selected {
   border-radius: 15px;
   background-color: #ddd; 
-  color: #000;
 }
 
-#crx_wlp ul li:hover {
-  border-radius: 15px;
+#crx_wlp_options ul li:hover {
   background-color: #ccc;
   color: #000;
 }
 
-#crx_wlp #crx_wlp_tweet {
+#crx_wlp_tweet {
   font-size: 0.7em;
   margin: 10px;
+  text-align: center;
 }
 
-#crx_wlp #crx_wlp_tweet a {
+#crx_wlp_tweet a {
   color: #fff;
 }
