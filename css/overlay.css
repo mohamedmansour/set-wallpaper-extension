@@ -1,27 +1,27 @@
-#fnpmapejgepknmmkciiclcloomblhopm { 
-  visibility: hidden; 
-  position: absolute; 
-  left: 0px; 
-  top: 0px; 
-  width:100%; 
-  height:100%; 
-  text-align:center; 
-  z-index: 9999; 
-  background-color: rgba(0,0,0,0.8);
-  font-family: Arial, Helvetica, 'Helvetica Neue', Verdana, sans-serif;
+#crx_wlp { 
+  -webkit-box-align: center;
+  -webkit-box-pack: center;
+  background: -webkit-radial-gradient(rgba(68, 68, 68, 0.5), rgba(68, 68, 68, 0.7) 35%, rgba(0, 0, 0, 0.9));
+  bottom: 0;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 9999;
+  font-size: 13px;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm > div { 
+#crx_wlp > div { 
   padding:15px; 
   margin: 0 auto; 
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm canvas {
+#crx_wlp canvas {
   background-color: #2981e4;
   border-radius: 5px;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm h1 {
+#crx_wlp h1 {
   margin: 0;
   padding: 10px;
   color: #fff;
@@ -29,45 +29,43 @@
   text-align: center;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_area {
+#crx_wlp #crx_wlp_area {
+  -webkit-box-align: center;
+  -webkit-box-pack: center;
   padding: 20px;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_preview {
+#crx_wlp #crx_wlp_preview {
   width: 580px;
-  margin: 0 auto; 
-  background: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    color-stop(0.28, rgba(168,168,168,0.9)),
-    color-stop(0.48, rgba(120,120,120,0.9)),
-    color-stop(0.1, rgba(168,168,168,0.9))
-  );
+  -webkit-box-shadow: 0px 5px 80px #444;
+  background: white;
+  border: 1px solid #BCC1D0;
   border-radius: 20px;
+  padding: 0;
+  margin: 0 auto; 
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_options {
+#crx_wlp #crx_wlp_options {
   padding-top: 10px;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_buttons {
+#crx_wlp #crx_wlp_buttons {
   padding: 20px;
   text-align: center;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_stretchButton,
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_tileButton,
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_centerButton,
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_fitButton,
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_fillButton {
+#crx_wlp #crx_wlp_stretchButton,
+#crx_wlp #crx_wlp_tileButton,
+#crx_wlp #crx_wlp_centerButton,
+#crx_wlp #crx_wlp_fitButton,
+#crx_wlp #crx_wlp_fillButton {
   background-repeat: no-repeat;
   background-position: 10px 8px;
 }
 
 
-#fnpmapejgepknmmkciiclcloomblhopm .crx_wlp_button,
-#fnpmapejgepknmmkciiclcloomblhopm .crx_wlp_button:visited {
+#crx_wlp .crx_wlp_button,
+#crx_wlp .crx_wlp_button:visited {
   display: inline-block;
   color: #fff;
   text-decoration: none;
@@ -83,39 +81,39 @@
   line-height: 1;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm .green.crx_wlp_button, 
-#fnpmapejgepknmmkciiclcloomblhopm .green.crx_wlp_button:visited  { 
+#crx_wlp .green.crx_wlp_button, 
+#crx_wlp .green.crx_wlp_button:visited  { 
   background-color: #91bd09;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm .green.crx_wlp_button:hover { 
+#crx_wlp .green.crx_wlp_button:hover { 
   background-color: #749a02;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm .yellow.crx_wlp_button, 
-#fnpmapejgepknmmkciiclcloomblhopm .yellow.crx_wlp_button:visited  {
+#crx_wlp .yellow.crx_wlp_button, 
+#crx_wlp .yellow.crx_wlp_button:visited  {
   background-color: #ffb515;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm .yellow.crx_wlp_button:hover {
+#crx_wlp .yellow.crx_wlp_button:hover {
   background-color: #fc9200;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm .orange.crx_wlp_button, 
-#fnpmapejgepknmmkciiclcloomblhopm .orange.crx_wlp_button:visited  {
+#crx_wlp .orange.crx_wlp_button, 
+#crx_wlp .orange.crx_wlp_button:visited  {
   background-color: #ff5c00;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm .orange.crx_wlp_button:hover {
+#crx_wlp .orange.crx_wlp_button:hover {
   background-color: #d45500;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm ul {
+#crx_wlp ul {
   margin: 0;
   padding: 0;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm ul li {
+#crx_wlp ul li {
   cursor: pointer;
   height: 40px;
   display: inline-block;
@@ -125,23 +123,23 @@
   padding: 10px 0px 10px 90px;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm ul li.selected {
+#crx_wlp ul li.selected {
   border-radius: 15px;
   background-color: #ddd; 
   color: #000;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm ul li:hover {
+#crx_wlp ul li:hover {
   border-radius: 15px;
   background: #ccc; 
   color: #000;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_tweet {
+#crx_wlp #crx_wlp_tweet {
   font-size: 0.7em;
   margin: 10px;
 }
 
-#fnpmapejgepknmmkciiclcloomblhopm #crx_wlp_tweet a {
+#crx_wlp #crx_wlp_tweet a {
   color: #fff;
 }
