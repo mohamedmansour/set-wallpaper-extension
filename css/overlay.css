@@ -1,3 +1,8 @@
+::selection { 
+  background: #ff5aff;
+  text-shadow: none;
+} 
+
 #crx_wlp { 
   -webkit-box-align: center;
   -webkit-box-pack: center;
@@ -13,6 +18,7 @@
   top: 0;
   z-index: 9999;
   font-size: 13px;
+  font-family: sans-serif;
 }
 
 #crx_wlp_area {
@@ -24,10 +30,17 @@
 #crx_wlp_preview {
   width: 580px;
   -webkit-box-shadow: 0px 5px 80px #444;
-  background: white;
   border: 1px solid #BCC1D0;
   border-radius: 20px;
   margin: 0 auto;
+  background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.19, rgba(245,245,245,0.9)),
+    color-stop(0.6, rgba(224,220,224,0.9)),
+    color-stop(0.8, rgba(250,250,250,0.9))
+  );
 }
 
 #crx_wlp_preview h1 {
@@ -35,6 +48,7 @@
   padding: 10px;
   text-shadow: 2px 2px 2px #000;
   text-align: center;
+  color: #333;
 }
 
 #crx_wlp_canvas {
@@ -47,35 +61,6 @@
 #crx_wlp_options {
   padding-top: 10px;
   text-align: center;
-}
-
-#crx_wlp_stretchButton,
-#crx_wlp_tileButton,
-#crx_wlp_centerButton,
-#crx_wlp_fitButton,
-#crx_wlp_fillButton {
-  background-repeat: no-repeat;
-  background-position: 10px 8px;
-}
-
-#crx_wlp_stretchButton {
-  background-image: url('/img/stretch.png');
-}
-
-#crx_wlp_tileButton {
-  background-image: url('/img/tile.png');
-}
-
-#crx_wlp_centerButton {
-  background-image: url('/img/center.png');
-}
-
-#crx_wlp_fillButton {
-  background-image: url('/img/fill.png');
-}
-
-#crx_wlp_fitButton {
-  background-image: url('/img/fit.png');
 }
 
 #crx_wlp #crx_wlp_buttons {
@@ -133,27 +118,56 @@
 }
 
 #crx_wlp_options ul li {
+  display: inline-block;
   cursor: pointer;
   height: 40px;
-  display: inline-block;
   line-height: 40px;
   width: 75px;
   color: #000;
   padding: 10px 0px 10px 90px;
   margin: 5px 0;
-  background-color: #eee;
   border-radius: 15px;
+  background-color: #ccc;
+  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 #crx_wlp_options ul li.selected {
-  border-radius: 15px;
-  background-color: #ddd; 
+  background-color: #aaa;
 }
 
 #crx_wlp_options ul li:hover {
-  background-color: #ccc;
-  color: #000;
+  background-color: #bbb;
 }
+
+#crx_wlp_stretchButton,
+#crx_wlp_tileButton,
+#crx_wlp_centerButton,
+#crx_wlp_fitButton,
+#crx_wlp_fillButton {
+  background-repeat: no-repeat;
+  background-position: 10px 8px;
+}
+
+#crx_wlp_stretchButton {
+  background-image: url('/img/stretch.png');
+}
+
+#crx_wlp_tileButton {
+  background-image: url('/img/tile.png');
+}
+
+#crx_wlp_centerButton {
+  background-image: url('/img/center.png');
+}
+
+#crx_wlp_fillButton {
+  background-image: url('/img/fill.png');
+}
+
+#crx_wlp_fitButton {
+  background-image: url('/img/fit.png');
+}
+
 
 #crx_wlp_tweet {
   font-size: 0.7em;
