@@ -20,7 +20,7 @@ function showDialog() {
   overlayDOM.setAttribute('frameBorder', '0');
   overlayDOM.setAttribute('width', '99.90%');
   overlayDOM.setAttribute('height', '100%');
-  overlayDOM.setAttribute('style', 'position: absolute; top: 0; overflow: hidden; z-index: 99999');
+  overlayDOM.setAttribute('style', 'position: absolute; top: 0; left: 0; overflow: hidden; z-index: 99999');
   document.body.appendChild(overlayDOM);
 }
 
