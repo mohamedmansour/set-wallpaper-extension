@@ -97,8 +97,5 @@ function setUserInterfaceNote(type) {
     message = 'No preview, automatically sets the wallpaper with the default ' +
               'position.';
   }
-  else if (type == 'newtab') {
-    message = 'A new tab page will open with the wallpaper preview screen.';
-  }
   $('user_interface_note').innerHTML = message;
 }
