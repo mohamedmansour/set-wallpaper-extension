@@ -6,6 +6,7 @@
 <script type='text/javascript' src='/js/position_enum.js'></script>
 <script type='text/javascript' src='/js/dimension.js'></script>
 <script type='text/javascript' src='/js/wallpaper_preview.js'></script>
+<script type='text/javascript' src='/js/preview_controller.js'></script>
 <body>
 <div id="crx_wlp">
   <div id="crx_wlp_area">
@@ -14,22 +15,17 @@
       <canvas id="crx_wlp_canvas" width="500" height="375" ></canvas>
       <div id="crx_wlp_options">
         <ul>
-          <li onClick="changeSelection(this, PositionEnum.STRETCH);"
-              id="crx_wlp_stretchButton">Stretch</li>
-          <li onClick="changeSelection(this, PositionEnum.TILE);"
-              id="crx_wlp_tileButton">Tile</li>
-          <li onClick="changeSelection(this, PositionEnum.CENTER);"
-              id="crx_wlp_centerButton">Center</li>
-          <li onClick="changeSelection(this, PositionEnum.FILL);"
-              id="crx_wlp_fillButton" style="display:none;">Fill</li>
-          <li onClick="changeSelection(this, PositionEnum.FIT);"
-              id="crx_wlp_fitButton" style="display:none;">Fit</li>
+          <li id="crx_wlp_stretchButton">Stretch</li>
+          <li id="crx_wlp_tileButton">Tile</li>
+          <li id="crx_wlp_centerButton">Center</li>
+          <li id="crx_wlp_fillButton" style="display:none;">Fill</li>
+          <li id="crx_wlp_fitButton" style="display:none;">Fit</li>
         </ul>
       </div>
       <div id="crx_wlp_buttons">
-        <a class="green crx_wlp_button" onclick="doSubmit();">Set wallpaper</a>
-        <a class="orange crx_wlp_button" onclick="doOptions();">Options</a>
-        <a class="yellow crx_wlp_button" onclick="doClose();">Close</a>
+        <a class="green crx_wlp_button" id="wallpaper_submit">Set wallpaper</a>
+        <a class="orange crx_wlp_button" id="wallpaper_options">Options</a>
+        <a class="yellow crx_wlp_button" id="wallpaper_close">Close</a>
       </div>
     </div>
     <div id="crx_wlp_tweet" ><a href="http://twitter.com/mohamedmansour">
@@ -37,103 +33,9 @@
     </div>
   </div>
 </div>
-  <script>
-  // Initialize the plugin.
-  //var bkg = chrome.extension.getBackgroundPage();
-  var preview = null;
-
-  // Force images.
-  $('crx_wlp_stretchButton').style.backgroundImage =
-      'url(' + chrome.extension.getURL('/img/stretch.png') + ')';
-  $('crx_wlp_tileButton').style.backgroundImage =
-      'url(' + chrome.extension.getURL('/img/tile.png') + ')';
-  $('crx_wlp_centerButton').style.backgroundImage =
-      'url(' + chrome.extension.getURL('/img/center.png') + ')';
-
-  /**
-   * Lets add Win7 specific positions and icons.
-   */
-  function setupWindows7Components() {
-    var fillButton = $('crx_wlp_fillButton');
-    var fitButton = $('crx_wlp_fitButton');
-    fillButton.style.display = 'inline-block';
-    fillButton.style.backgroundImage =
-        'url(' + chrome.extension.getURL('/img/fill.png') + ')';
-    fitButton.style.display = 'inline-block';
-    fitButton.style.backgroundImage =
-        'url(' + chrome.extension.getURL('/img/fit.png') + ')';
-  }
-
-  /**
-   * Change the selection of the wallpaper style.
-   *
-   * @param {HTMLElement} dom The current list item.
-   * @param {Object<PositionEnum>} position The wallpaper position to set.
-   */
-  function changeSelection(dom, position) {
-    var lists = document.getElementsByTagName('li');
-    for (var i in lists) {
-      var list = lists[i];
-      list.className = '';
-    }
-    dom.className = 'selected';
-    preview.render(position);
-  }
-  
-  /**
-   * Submit a request to change the wallpaper.
-   */
-  function doSubmit() {
-    chrome.extension.sendRequest({
-        method: 'SetWallpaper', 
-        data: {
-          image: preview.getImageURL(),
-          position: preview.getPosition()
-        }
-    });
-  }
-  
-  /**
-   * View Options.
-   */
-  function doOptions() {
-     chrome.extension.sendRequest({method: 'OpenOptions'});
-  }
-  
-  /**
-   * Close Preview.
-   */
-  function doClose() {
-    if (parent) {
-      chrome.extension.sendRequest({method: 'RemoveOverlay'});
-    }
-    else {
-      window.close();
-    }
-  }
-  
-  // Listen for extension requests.
-  chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
-    console.debug('Extension request received! ' + req.method);
-    if (req.method == 'SetImage') {
-      // Startup the previewer to do its business!
-      preview = new WallpaperPreview('crx_wlp_canvas', req.data.image,
-                                      PositionEnum.valueOf(req.data.position));
-      // Send a call natively to inform the operating system about its color.
-      chrome.extension.sendRequest({method: 'GetSystemColor'}, function(res) {
-        preview.setCanvasBackground(res.color);
-      });
-      // Set the appropriate item selected.
-      var i = $('crx_wlp_' + req.data.position + 'Button');
-      i.className = 'selected';
-    }
-    else if (req.method = 'IsWindows7') {
-      if (req.data) {
-        setupWindows7Components();
-      }
-    }
-    sendResponse({});
-  });
-  </script>
+<script>
+var preview_controller = new PreviewController();
+preview_controller.init();
+</script>
 </body>
 </html>
