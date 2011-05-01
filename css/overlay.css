@@ -44,11 +44,8 @@
 }
 
 #crx_wlp_preview h1 {
-  margin: 0;
-  padding: 10px;
-  text-shadow: 2px 2px 2px #000;
-  text-align: center;
-  color: #333;
+ text-shadow: 0px 1px 0px #e5e5ee;
+ text-align: center;
 }
 
 #crx_wlp_canvas {
