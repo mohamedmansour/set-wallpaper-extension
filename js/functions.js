@@ -7,17 +7,6 @@ function $(id) {
 }
 
 /**
- * Function extension for binding the current scope.
- * @param {Object} scope the scope to bind the function that is extended.
- */
-Function.prototype.bind = function(scope) {
-  var _function = this;
-  return function() {
-    return _function.apply(scope, arguments);
-  }
-};
-
-/**
  * Trim the results from spaces from the beginning and end
  * @return {string} the trimmed string.
  */
