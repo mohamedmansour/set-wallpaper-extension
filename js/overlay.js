@@ -30,4 +30,3 @@ function showDialog() {
 // listen correctly. For now, this hack is to make sure it is visible at all 
 // times. The downside, we render the iframe twice. Add / Remove / Add.
 showDialog();
-showDialog();

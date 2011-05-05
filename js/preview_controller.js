@@ -12,32 +12,53 @@ PreviewController = function()
 };
 
 /**
- * Initializes listeners for the buttons in the previewer.
+ * Bind preview listeners to the DOM to setup the renderer.
  */
-PreviewController.prototype.init = function()
+PreviewController.prototype.bind = function()
+{
+  window.addEventListener('load', this.onLoad.bind(this));
+  chrome.extension.onRequest.addListener(this.onMessage.bind(this));
+};
+
+/**
+ * External extension request listeners message handling.
+ */
+PreviewController.prototype.onMessage = function(req, sender, sendResponse)
+{
+  if (req.method == 'SetImage') {
+    // Startup the previewer to do its business!
+    this.preview = new WallpaperPreview('crx_wlp_canvas', req.data.image,
+                                         PositionEnum.valueOf(req.data.position));
+    // Send a call natively to inform the operating system about its color.
+    chrome.extension.sendRequest({method: 'GetSystemColor'},
+                                 onSystemColorChange.bind(this));
+    // Set the appropriate item selected.
+    var i = $('crx_wlp_' + req.data.position + 'Button');
+    i.className = 'selected';
+  }
+  else if (req.method = 'IsWindows7') {
+    if (req.data) {
+      this.setupWindows7Components();
+    }
+  }
+  sendResponse({});
+};
+
+/**
+ * System Color Change response.
+ */
+PreviewController.prototype.onSystemColorChange = function(res)
+{
+  this.preview.setCanvasBackground(res.color);
+};
+
+
+/**
+ * Preview DOM loaded response.
+ */
+PreviewController.prototype.onLoad = function()
 {
   var self = this;
-  // Listen for extension requests.
-  chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
-    if (req.method == 'SetImage') {
-      // Startup the previewer to do its business!
-      self.preview = new WallpaperPreview('crx_wlp_canvas', req.data.image,
-                                           PositionEnum.valueOf(req.data.position));
-      // Send a call natively to inform the operating system about its color.
-      chrome.extension.sendRequest({method: 'GetSystemColor'}, function(res) {
-        self.preview.setCanvasBackground(res.color);
-      });
-      // Set the appropriate item selected.
-      var i = $('crx_wlp_' + req.data.position + 'Button');
-      i.className = 'selected';
-    }
-    else if (req.method = 'IsWindows7') {
-      if (req.data) {
-        self.setupWindows7Components();
-      }
-    }
-    sendResponse({});
-  });
 
   // Add button click event listeners.
   $('crx_wlp_stretchButton').addEventListener('click', function() {
@@ -64,6 +85,8 @@ PreviewController.prototype.init = function()
   $('wallpaper_close').addEventListener('click', function() {
     self.doClose();
   }, false);
+
+  chrome.extension.sendRequest({method: 'PreviewLoaded'});
 };
 
 /**
