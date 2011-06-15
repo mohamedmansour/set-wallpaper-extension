@@ -31,7 +31,7 @@ PreviewController.prototype.onMessage = function(req, sender, sendResponse)
                                          PositionEnum.valueOf(req.data.position));
     // Send a call natively to inform the operating system about its color.
     chrome.extension.sendRequest({method: 'GetSystemColor'},
-                                 onSystemColorChange.bind(this));
+                                 this.onSystemColorChange.bind(this));
     // Set the appropriate item selected.
     var i = $('crx_wlp_' + req.data.position + 'Button');
     i.className = 'selected';
