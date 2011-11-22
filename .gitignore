@@ -1,0 +1,6 @@
+source/Release
+source/Debug
+source/bin
+source/*.suo
+*.zip
+*.dll
