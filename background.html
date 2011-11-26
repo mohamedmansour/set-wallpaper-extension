@@ -158,7 +158,7 @@ function onInstall() {
 function onUpdate() {
   // Do not send updates if the user is opt'd out!
   if (!settings.opt_out) {
-    chrome.tabs.create({url: 'updates.html'});
+    //chrome.tabs.create({url: 'updates.html'});
   }
   
   // Migration from newtab to overlay
