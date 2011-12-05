@@ -2,5 +2,9 @@ source/Release
 source/Debug
 source/bin
 source/*.suo
+build
+install
 *.zip
 *.dll
+.sconsign.dblite
+*.swp

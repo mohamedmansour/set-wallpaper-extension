@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
-#include <npapi.h>
-#include <npfunctions.h>
+#include "npapi.h"
+#include "npfunctions.h"
 
 extern NPNetscapeFuncs* npnfuncs;
 
