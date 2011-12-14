@@ -8,8 +8,8 @@
 
 #include <map>
 
-#include <npapi.h>
-#include <npfunctions.h>
+#include "npapi.h"
+#include "npfunctions.h"
 
 namespace desktop_service {
   
