@@ -20,6 +20,33 @@ look like exactly how the image will be scaled on your screen.
 When the user chooses save background, it will go to a NPAPI plugin which is
 programmed in C++ that hooks itself to the Windows API.
 
+How to build?
+-------------
+Prerequisites:
+
+* [SCons](http://www.scons.org/) and [Python](http://python.org/)
+    * Windows: You may need to modify the `PATH` environment variable to include 
+      `<PYTHON_ROOT>\Scripts` (where the scons.bat file gets installed).
+* Windows: an installation of Visual Studio. Express versions will work but
+  these are limited to 32bit builds only.
+* [Markdown in Python](http://www.freewisdom.org/projects/python-markdown) if
+  you want to convert this README in Markdown format to HTML.
+
+
+Run `scons -h` for a list of command-line arguments. Of note are:
+
+* *DEBUG*: Build the shared-library part of the extension with debugging
+  support.
+* *TARGET_ARCH*: Can be either x86 (32bit build) or x86_64 (64bit build).
+
+
+The default target (i.e. typing `scons` with no target name) will build the
+shared library and creat an 'unpacked' extension in a directory called
+`install-<debug|release>-<arch>`. Files generated during the build are placed in
+`build-<debug|release>-<arch>`.
+
+To convert this README.md into html format, use the target `scons readme`.
+
 How to debug?
 -------------
 You can debug the extension's Native (NPAPI) instance by setting a property 
