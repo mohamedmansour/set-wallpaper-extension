@@ -33,7 +33,7 @@ else:
   assert False
 
 # Targets to build C++ files
-sources = source_env.Object(source_env.Glob('*.cc'))
+sources = source_env.Object(source_env.Glob('*.cc')) + source_env.RES('setwallpaper_plugin.rc')
 
 if str(Platform()) == 'win32':
   # Add the def file to the sources list in windows. SCons will figure out what
