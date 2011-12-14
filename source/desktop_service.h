@@ -6,7 +6,7 @@
 #define DESKTOP_SERVICE_H_
 #pragma once
 
-#include <npfunctions.h>
+#include "npfunctions.h"
 
 namespace desktop_service {
 

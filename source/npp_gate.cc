@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <new>
 
-#include <npapi.h>
+#include "npapi.h"
 
 #include "desktop_service.h"
 

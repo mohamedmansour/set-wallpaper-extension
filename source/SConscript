@@ -1,0 +1,46 @@
+Import('env')
+source_env = env.Clone()
+
+if str(Platform()) == 'win32':
+  source_env.Append(CPPDEFINES = [
+    'XULRUNNER_SDK',
+    'WIN32',
+    '_WINDOWS',
+    'XP_WIN32',
+    'MOZILLA_STRICT_API',
+    'XPCOM_GLUE',
+    'XP_WIN',
+    '_X86_',
+    'setbackground_plugin_EXPORTS',
+    '_CRT_SECURE_NO_WARNINGS',
+    '_CRT_SECURE_NO_DEPRECATE'
+    '_WINDLL',
+    '_UNICODE',
+    'UNICODE',
+    'WIN32_LEAN_AND_MEAN'
+    ])
+  source_env.Append(CPPFLAGS = ['/EHsc', '/W3'])
+  source_env.Append(LIBS = ['urlmon.lib', 'userenv.lib', 'user32.lib', 'ole32.lib', 'advapi32.lib'])
+  if source_env['DEBUG']:
+    source_env.Append(CCFLAGS = ['/Od', '/RTC1', '/Z7', '/MTd'])
+    source_env.Append(LINKFLAGS = ['/DEBUG'])
+    source_env.Append(CPPDEFINES = ['_DEBUG'])
+  else:
+    source_env.Append(CCFLAGS = ['/O2', '/MT'])
+    source_env.Append(CPPEDEFINES = ['NDEBUG'])
+else:
+  # Unsupported platform
+  assert False
+
+# Targets to build C++ files
+sources = source_env.Object(source_env.Glob('*.cc')) + source_env.RES('setwallpaper_plugin.rc')
+
+if str(Platform()) == 'win32':
+  # Add the def file to the sources list in windows. SCons will figure out what
+  # to do with it.
+  sources = sources + [source_env.File('module_definition.def')]
+
+# Target for plugin shared library
+dll = source_env.SharedLibrary('setwallpaper_plugin', sources)
+
+Return('dll')
