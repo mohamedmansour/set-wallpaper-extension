@@ -35,15 +35,27 @@ Prerequisites:
 
 Run `scons -h` for a list of command-line arguments. Of note are:
 
-* *DEBUG*: Build the shared-library part of the extension with debugging
+* **DEBUG**: Build the shared-library part of the extension with debugging
   support.
-* *TARGET_ARCH*: Can be either x86 (32bit build) or x86_64 (64bit build).
+* **TARGET_ARCH**: Can be either x86 (32bit build) or x86_64 (64bit build).
+* **CHROME_BIN**: Location of the chrome binary. Required if running the
+  extension packaging target.
+* **PRIVATE_KEY**: Location of the .pem file used for signing a packaged
+  extension. If one isn't provided, a key is created when packaging.
 
+Targets:
 
-The default target (i.e. typing `scons` with no target name) will build the
-shared library and creat an 'unpacked' extension in a directory called
-`install-<debug|release>-<arch>`. Files generated during the build are placed in
-`build-<debug|release>-<arch>`.
+* **unpacked**: (Default) Build the shared library part of the extension and
+  install it and all other extension files in a directory called
+  `install-<debug|release>-<arch>/set-wallpaper-extension` resulting in an
+  'unpacked' extension that can be loaded with Chrome using _Developer Mode_.
+  Intermediate files created during the build are placed in
+  `build-<debug|release>-<arch>`.
+* **packed**: After building an unpacked extension, package the extension into a
+  .crx file. For this target, the `CHROME_BIN` construction variable must be
+  set. The `PRIVATE_KEY` variable provides the path to a signing key to use.
+  If no key is provided, one will be created. The resulting .crx (and .pem file)
+  are placed in `install-<debug|release>-<arch>`.
 
 To convert this README.md into html format, use the target `scons readme`.
 
