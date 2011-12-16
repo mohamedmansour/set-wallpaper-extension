@@ -56,8 +56,15 @@ Targets:
   set. The `PRIVATE_KEY` variable provides the path to a signing key to use.
   If no key is provided, one will be created. The resulting .crx (and .pem file)
   are placed in `install-<debug|release>-<arch>`.
+* **readme**: Use markdown for python to convert README.md into html. Useful
+  for previewing the file before a push.
 
-To convert this README.md into html format, use the target `scons readme`.
+The scons documentation can be read for more details but to start a build, the
+command-line should look something like this:
+
+    scons VAR1=value1 VAR2=value2 ... [target]
+
+The target name is optional. If not provided, the default target is used.
 
 How to debug?
 -------------
@@ -66,7 +73,6 @@ for the plugin:
  
     app.debug = true;
 
-![Screenshot of the Chrome Extension](https://chrome.google.com/extensions/img/ddkmiidlgnkhnfhigdpadkaamogngkin/1288980317.71/screenshot/22002)
-
+---
 
 Mohamed Mansour hello@mohamedmansour.com
