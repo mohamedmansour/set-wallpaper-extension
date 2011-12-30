@@ -20,6 +20,10 @@ NPError OSCALL NP_GetEntryPoints(NPPluginFuncs *plugin_functions) {
   plugin_functions->destroy       = NPP_Destroy;
   plugin_functions->event         = NPP_HandleEvent;
   plugin_functions->getvalue      = NPP_GetValue;
+  plugin_functions->newstream     = NPP_NewStream;
+  plugin_functions->asfile        = NPP_StreamAsFile;
+  plugin_functions->destroystream = NPP_DestroyStream;
+  plugin_functions->urlnotify     = NPP_URLNotify;
   return NPERR_NO_ERROR;
 }
 
