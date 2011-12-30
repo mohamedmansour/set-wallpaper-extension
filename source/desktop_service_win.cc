@@ -9,6 +9,7 @@
 #include <shlobj.h>
 #include <urlmon.h>
 #include <userenv.h>
+#include <sstream>
 
 #include "scripting_bridge.h"
 #include "string_utils.h"
@@ -57,79 +58,18 @@ bool DesktopService::GetWallpaperStyle(NPVariant* result) {
 }
 
 bool DesktopService::SetWallpaper(NPVariant* result,
-                                  NPString image_url_char,
+                                  NPString image_url,
                                   int style) {
   SendConsole("SetWallpaper::BEGIN starting");
-  SendConsole(std::string("SetWallpaper::URL ").append(
-      image_url_char.UTF8Characters).c_str());
-  std::wstring image_url(string_utils::SysUTF8ToWide(
-      image_url_char.UTF8Characters));
+  SendConsole(std::string("SetWallpaper::URL ").append(image_url.UTF8Characters).c_str());
 
-  // Figures out what the home directory is.
-  TCHAR home_dir[MAX_PATH];
-  HANDLE token_handle = 0;
-  if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token_handle) == FALSE) {
-    SendError("SetWallpaper::OpenProcessToken::Error");
-    return false;
-  }
-  DWORD buffer_size = MAX_PATH;
-  if (GetUserProfileDirectory(token_handle, home_dir, &buffer_size) == FALSE) {
-    SendError("SetWallpaper::GetUserProfileDirectory::Error");
-    return false;
-  }
-  CloseHandle(token_handle);
+  m_style = style;
 
-  // Downloads the wallpaper to the users home directory.
-  // TODO(mohamed): Figure out a way to extract image from Chrome's cache.
-  TCHAR wallpaper_path[MAX_PATH];
-  wsprintf(wallpaper_path, L"%s\\extension_wallpaper", home_dir);
-  HRESULT hr = URLDownloadToFile(NULL, image_url.c_str(), wallpaper_path,
-                                 BINDF_GETNEWESTVERSION, NULL);
+  // Ask browser to retrieve this file for us. The actual wallpaper-setting process
+  // is completed by img_arrived().
+  NPError err = NPN_GetURLNotify(npp_, image_url.UTF8Characters, 0, 0);
 
-  // Check if download was successful.
-  if (FAILED(hr)) {
-    SendError("SetWallpaper::Download::Error");
-    return false;
-  }
-
-  SendConsole("SetWallpaper::Download success.");
-  SendConsole(std::string("SetWallpaper::Path ").append(
-      string_utils::SysWideToUTF8(wallpaper_path)).c_str());
-
-  // Set the active wallpaper on the desktop.
-  LPACTIVEDESKTOP active_desktop;
-  WALLPAPEROPT wallpaper_options;
-  CoInitialize(NULL);
-  hr = CoCreateInstance(CLSID_ActiveDesktop, NULL, CLSCTX_INPROC_SERVER,
-                        IID_IActiveDesktop, (void**)&active_desktop);
-  if (SUCCEEDED(hr)) {
-    hr = active_desktop->SetWallpaper(wallpaper_path, 0);
-    if (SUCCEEDED(hr)) {
-      wallpaper_options.dwSize = sizeof(WALLPAPEROPT);
-      wallpaper_options.dwStyle = style;
-      hr = active_desktop->SetWallpaperOptions(&wallpaper_options, 0);
-      if (SUCCEEDED(hr)) {
-        hr = active_desktop->ApplyChanges(AD_APPLY_ALL);
-      } else {
-        SendConsole("SetWallpaper::Options failed!");
-      }
-    } else {
-      SendConsole("SetWallpaper::Image failed!");
-    }
-    active_desktop->Release();
-  } else {
-    SendConsole("SetWallpaper::Creation failed!");
-  }
-
-  // Error code checking.
-  if (FAILED(hr)) {
-    SendError("SetWallpaper::Apply::Error");
-  }
-
-  // Cleanup.
-  CoUninitialize();
-  SendConsole("SetWallpaper::DONE succeeded!");
-  return SUCCEEDED(hr);
+  return err == NPERR_NO_ERROR;
 }
 
 void DesktopService::SendConsole(const char* message) {
@@ -170,6 +110,112 @@ void DesktopService::SendError(const char* message) {
   sprintf(error_message, "%s %04d", message, GetLastError());
   NPN_SetException(scriptable_object_, error_message);
   SendConsole(error_message);
+}
+
+void DesktopService::new_stream(NPStream* stream)
+{
+  std::ostringstream oss;
+  oss << "New stream opened: " << stream;
+  SendConsole(oss.str().c_str());
+}
+
+class COMCleanup {
+public:
+  ~COMCleanup()
+  {
+    CoUninitialize();
+  }
+};
+
+void DesktopService::img_arrived(NPStream* stream, const char* img_path)
+{
+  // Image has arrived. Finish setting wallpaper.
+  std::ostringstream oss;
+  oss << "Stream " << stream << " resulted in file downloaded to " << img_path;
+  SendConsole(oss.str().c_str());
+
+  // Set the active wallpaper on the desktop.
+  LPACTIVEDESKTOP active_desktop;
+  WALLPAPEROPT wallpaper_options;
+  CoInitialize(NULL);
+  HRESULT hr;
+  hr = CoCreateInstance(CLSID_ActiveDesktop, NULL, CLSCTX_INPROC_SERVER,
+                        IID_IActiveDesktop, (void**)&active_desktop);
+  if (FAILED(hr)) {
+    SendConsole("SetWallpaper::Creation failed!");
+    return;
+  }
+
+  // Perform COM cleanup when this object goes out of scope.
+  COMCleanup com_cleanup;
+
+  // Copy from char* to TCHAR* for SetWallpaper's benefit.
+  size_t path_len = std::strlen(img_path);
+  TCHAR* img_path_tchar = new TCHAR[path_len + 1];
+  img_path_tchar[path_len] = 0;
+  std::copy(img_path, img_path + path_len, img_path_tchar);
+
+  hr = active_desktop->SetWallpaper(img_path_tchar, 0);
+  if (FAILED(hr)) {
+    SendConsole("SetWallpaper::Image failed!");
+    return;
+  }
+
+  wallpaper_options.dwSize = sizeof(WALLPAPEROPT);
+  wallpaper_options.dwStyle = m_style;
+  hr = active_desktop->SetWallpaperOptions(&wallpaper_options, 0);
+  if (FAILED(hr)) {
+    SendConsole("SetWallpaper::Options failed!");
+    return;
+  }
+
+  hr = active_desktop->ApplyChanges(AD_APPLY_ALL);
+  if (FAILED(hr)) {
+    SendError("SetWallpaper::Apply::Error");
+    return;
+  }
+
+  SendConsole("SetWallpaper success!");
+}
+
+void DesktopService::stream_done(NPStream* stream, NPReason reason)
+{
+  std::ostringstream oss;
+  oss << "Stream " << stream << " done. Reason: ";
+  switch (reason) {
+  case NPRES_DONE:
+    oss << "NPRES_DONE";
+    break;
+
+  case NPRES_USER_BREAK:
+    oss << "NPRES_USER_BREAK";
+    break;
+
+  case NPRES_NETWORK_ERR:
+    oss << "NPRES_NETWORK_ERR";
+    break;
+  }
+  SendConsole(oss.str().c_str());
+}
+
+void DesktopService::url_notify(const char* url, NPReason reason)
+{
+  std::ostringstream oss;
+  oss << "GetURL of " << url << " done. Reason: ";
+  switch (reason) {
+  case NPRES_DONE:
+    oss << "NPRES_DONE";
+    break;
+
+  case NPRES_USER_BREAK:
+    oss << "NPRES_USER_BREAK";
+    break;
+
+  case NPRES_NETWORK_ERR:
+    oss << "NPRES_NETWORK_ERR";
+    break;
+  }
+  SendConsole(oss.str().c_str());
 }
 
 }  // namespace desktop_service
