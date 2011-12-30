@@ -30,10 +30,23 @@ class DesktopService {
   // Send an error message to the console and to the chrome extension.
   void SendError(const char* message);
 
+  // Called by the implementation of NPP_NewStream.
+  void new_stream(NPStream* stream);
+
+  // Called by the implementation of NPP_StreamAsFile.
+  void img_arrived(NPStream* stream, const char* fname);
+
+  // Called by the implementation of NPP_DestroyStream.
+  void stream_done(NPStream* stream, NPReason reason);
+
+  // CAlled by the implementation of NPP_URLNotify.
+  void url_notify(const char* url, NPReason reason);
+
  private:
   NPP npp_;
   NPObject* scriptable_object_;
   bool debug_;
+  int m_style;
 };
 
 }  // namespace desktop_service
