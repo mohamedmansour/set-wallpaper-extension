@@ -1,3 +1,5 @@
+import os.path
+
 Import('env')
 source_env = env.Clone()
 
@@ -33,14 +35,52 @@ else:
   assert False
 
 # Targets to build C++ files
-sources = source_env.Object(source_env.Glob('*.cc')) + source_env.RES('setwallpaper_plugin.rc')
+sources = source_env.Object(source_env.Glob('*.cc'))
 
 if str(Platform()) == 'win32':
   # Add the def file to the sources list in windows. SCons will figure out what
-  # to do with it.
-  sources = sources + [source_env.File('module_definition.def')]
+  # to do with it. Need to compile and link in our resource script as well.
+  sources = sources + source_env.RES('setwallpaper_plugin.rc') + [source_env.File('module_definition.def')]
 
 # Target for plugin shared library
 dll = source_env.SharedLibrary('setwallpaper_plugin', sources)
+
+if 'MSVS_VERSION' in source_env:
+
+  srcs = [os.path.basename(s.srcnode().path) for s in source_env.Glob('*.cc')]
+  incs = [os.path.basename(i.srcnode().path) for i in source_env.Glob('*.h')]
+
+  # The MSVSProject builder doesn't support command-line construction variables
+  # for the build, re-build, and clean commands which all invoke scons. These
+  # are necessary because the buildtarget may not exist to SCons if the
+  # construction variables are not set. The two we care about are DEBUG and
+  # TARGET_ARCH. Figuring out to change MSVSBUILDCOM and friends came from
+  # reading the SCons source file Tool/msvs.py.
+
+  commandline_vars = ' DEBUG=' + ('1' if source_env['DEBUG'] else '0') + ' TARGET_ARCH=' + source_env['TARGET_ARCH']
+  variant = '{0}|{1}'.format('Debug' if source_env['DEBUG'] else 'Release', 'Win32' if source_env['TARGET_ARCH'] == 'x86' else 'x64')
+
+  project_base_name = 'set-wallpaper-extension'
+  project_name = '{0}-{1}-{2}{3}'.format(project_base_name,
+                                         'debug' if source_env['DEBUG'] else 'release',
+                                         'win32' if source_env['TARGET_ARCH'] == 'x86' else 'x64',
+                                         source_env['MSVSPROJECTSUFFIX'])
+  gen_project = source_env.MSVSProject(target=project_name,
+                                       variant=variant,
+                                       buildtarget=dll[0],
+                                       srcs=srcs,
+                                       incs=incs,
+                                       resources=['setwallpaper_plugin.rc'],
+                                       misc=['module_definition.def'],
+                                       MSVSBUILDCOM=source_env['MSVSBUILDCOM'] + commandline_vars,
+                                       MSVSREBUILDCOM=source_env['MSVSREBUILDCOM'] + commandline_vars,
+                                       MSVSCLEANCOM=source_env['MSVSCLEANCOM'] + commandline_vars,
+                                       auto_build_solution=0)
+  gen_solution = source_env.MSVSSolution(target=project_base_name + source_env['MSVSSOLUTIONSUFFIX'],
+                                         variant=variant,
+                                         projects = [gen_project[0].srcnode()])
+  source_env.Depends(gen_solution, gen_project);
+
+  source_env.Alias('msvs_project', gen_solution)
 
 Return('dll')

@@ -30,7 +30,7 @@ Prerequisites:
 * Windows: an installation of Visual Studio. Express versions will work but
   these are limited to 32bit builds only.
 * [Markdown in Python](http://www.freewisdom.org/projects/python-markdown) if
-  you want to convert this README in Markdown format to HTML.
+  you want to generate this README from its Markdown source.
 
 
 Run `scons -h` for a list of command-line arguments. Of note are:
@@ -58,16 +58,46 @@ Targets:
   are placed in `install-<debug|release>-<arch>`.
 * **readme**: Use markdown for python to convert README.md into html. Useful
   for previewing the file before a push.
+* **msvs_project**: Generate a Visual Studio Project. Refer to the
+  [Generating MSVS Projects](#msvs) section below for more details.
 
 The scons documentation can be read for more details but to start a build, the
 command-line should look something like this:
 
     scons VAR1=value1 VAR2=value2 ... [target]
 
-The target name is optional. If not provided, the default target is used.
+The target name is optional. If not provided, the default target is used. Build
+results and intermediate files are placed in a directory with the following
+format:
 
-How to debug?
--------------
+    build-<debug|release>-<x86|x86_64>
+
+This scheme of including the build variant in the directory name enables build
+results for varying values of the **DEBUG** and **TARGET_ARCH** command-line
+variables to exist at the same time.
+
+Generating MSVS <a id="msvs">Projects</a>
+------------------------
+
+The **msvs_project** target is used to build a Visual Studio Project using
+SCon's built-in functionality. This functionality has some caveats however:
+
+* The resulting solution file (`.sln` file) is placed in the build directory
+  with other build results and intermediate files whereas the project files
+  (`.vcxproj` files) are placed in the `source` directory.
+    * As a result, project files have the build variant as part of their names
+      to prevent naming collisions.
+
+The generated solution file can be opened with Visual Studio to navigate, edit,
+and build source. Building the project within Visual Studio will invoke scons
+with the same **DEBUG** and **TARGET_ARCH** command-line variable values as
+were provided when the project files were generated. The result of the build is
+the NPAPI DLL component of the plugin. Since this DLL is not a stand-alone
+executable using the run or run-in-debug-mode commands in Visual Studio will
+cause Visual Studio to complain.
+
+How to debug the plugin
+-----------------------
 You can debug the extension's Native (NPAPI) instance by setting a property 
 for the plugin:
  

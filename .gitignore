@@ -2,6 +2,7 @@ source/Release
 source/Debug
 source/bin
 source/*.suo
+source/*.vcxproj*
 build-*
 install-*
 *.zip
