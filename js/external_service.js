@@ -5,6 +5,8 @@ ExternalService = function(controller) {
   this.controller = controller;
 };
 
+ExternalService.URL_PATTERN = new RegExp(/[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi);
+
 /**
  * Initializes the service.
  */
@@ -49,7 +51,36 @@ ExternalService.prototype.onRequestExternalListener = function(request, sender, 
  * @param {Function<object>} sendResponse The callback to send back.
  */
 ExternalService.prototype.success = function(extensionID, request, sendResponse) {
-  sendResponse({status: true, message: 'WallpaperSet'});
+  if (request.method === 'Ping') {
+    sendResponse({status: true, message: 'Pong'});
+  }
+  else if (request.method === 'SetWallpaper' && request.data != 'undefined') {
+    if (!request.data) {
+      sendResponse({status: false, message: 'InvalidArguments'});
+      return;
+    }
+
+    // Validate url.
+    var url = request.data.url || '';
+    if (!url.match(ExternalService.URL_PATTERN)) {
+      sendResponse({status: false, message: 'InvalidURL'});
+      return;
+    }
+
+    // Validate position.
+    var position = parseInt(request.data.position) || 0;
+    if (!position) {
+      sendResponse({status: false, message: 'InvalidPosition'});
+      return;
+    }
+
+    // Call the plugin service to set the wallpaper.
+    this.controller.getPluginService().setWallpaper(request.data.url, request.data.position);
+    sendResponse({status: true, message: 'WallpaperSet'});
+  }
+  else {
+    sendResponse({status: false, message: 'InvalidRequest'});
+  }
 };
 
 /**
