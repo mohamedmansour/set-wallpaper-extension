@@ -9,7 +9,6 @@ window.addEventListener('load', onLoad, false);
  */
 function onLoad() {
   onRestore();
-  $('button-save').addEventListener('click', onSave, false);
   $('button-close').addEventListener('click', onClose, false);
   $('release-notes').addEventListener('click', onReleaseNotes, false);
 }
@@ -29,32 +28,25 @@ function onClose() {
 }
 
 /**
- * Saves options to localStorage.
- */
-function onSave() {
-  // Save settings.
-  bkg.settings.debug = $('debug').checked;
-  bkg.settings.user_interface = $('user_interface').value;
-  bkg.settings.position = $('position').value;
-  bkg.settings.opt_out = $('opt_out').checked;
-  
-  // Update status to let user know options were saved.
-  var info = $('info-message');
-  info.style.display = 'inline';
-  info.style.opacity = 1;
-  setTimeout(function() {
-    info.style.opacity = 0.0;
-  }, 1000);
-}
-
-/**
  * Restore all options.
  */
 function onRestore() {
   // Restore settings.
   $('version').innerHTML = ' (v' + bkg.settings.version + ')';
-  $('debug').checked = bkg.settings.debug;
-  $('opt_out').checked = bkg.settings.opt_out;
+  
+  // Debug
+  var debugElement = $('debug');
+  debugElement.addEventListener('click', function(e) {
+    bkg.settings.debug = debugElement.checked;
+  });
+  debugElement.checked = bkg.settings.debug;
+  
+  // Opt out
+  var optElement = $('opt_out');
+  optElement.addEventListener('click', function(e) {
+    bkg.settings.opt_out = optElement.checked;
+  });
+  optElement.checked = bkg.settings.opt_out;
   
   // Add different positions.
   var positionElement = $('position')
@@ -65,7 +57,11 @@ function onRestore() {
     positionElement.add(createPositionOption('Fill'));
     positionElement.add(createPositionOption('Fit'));
   }
-  $('position').value = bkg.settings.position;
+  positionElement.value = bkg.settings.position;
+  positionElement.addEventListener('change', function(e) {
+    var value = this.options[this.selectedIndex].value;
+    bkg.settings.position = value;
+  });
   
   // Restore the user interface options and its note.
   var userInterfaceElement = $('user_interface');
@@ -73,6 +69,7 @@ function onRestore() {
   userInterfaceElement.addEventListener('change', function(e) {
     var value = this.options[this.selectedIndex].value;
     setUserInterfaceNote(value);
+    bkg.settings.user_interface = value;
   }, false);
   setUserInterfaceNote(bkg.settings.user_interface);
 }
