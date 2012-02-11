@@ -17,7 +17,7 @@ function displayVersion() {
  * View options screen.
  */
 function viewOptions() {
-  bkg.openSingletonPage(chrome.extension.getURL('options.html'));
+  bkg.controller.openSingletonPage(chrome.extension.getURL('options.html'));
 }
 </script>
 </head>
@@ -41,6 +41,7 @@ function viewOptions() {
         <div class="extension-header">Version 3.0.0</div>
         <div class="extension-options">
           <ul>
+            <li><strong>Feature:</strong> External Extension API. Other locally installed extensions can communicate to this wallpaper service. You would have to grant them access when they initiate a request. You can block or allow such request.</li>
             <li><strong>Feature:</strong> Automatically save options.</li>
             <li><strong>Feature:</strong> New Options User Interface.</li>
             <li><strong>Feature:</strong> Setting wallpaper much faster, uses photos from the cache first if exists otherwise downloads it.</li>

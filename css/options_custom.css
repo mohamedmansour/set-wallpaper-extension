@@ -1,0 +1,15 @@
+#whitelisted_list, #blacklisted_list  {
+  width: 300px;
+  float: left;
+  margin-right: 10px;
+}
+#whitelisted-list-add, #whitelisted-list-remove, #whitelisted-list-remove-all,
+#blacklisted-list-add, #blacklisted-list-remove, #blacklisted-list-remove-all  {
+  display: block;
+  width: 100px;
+  margin-bottom: 5px;
+}
+
+#whitelisted-item-add , #blacklisted-item-add{
+  width: 100%;
+}

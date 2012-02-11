@@ -1,6 +1,8 @@
 // Extensions pages can all have access to the bacground page.
 var bkg = chrome.extension.getBackgroundPage();
 
+var approverOptions = new ApproverOptions();
+
 // When the DOM is loaded, make sure all the saved info is restored.
 window.addEventListener('load', onLoad, false);
 
@@ -11,13 +13,14 @@ function onLoad() {
   onRestore();
   $('button-close').addEventListener('click', onClose, false);
   $('release-notes').addEventListener('click', onReleaseNotes, false);
+  approverOptions.init();
 }
 
 /**
  * When release notes is clicked.
  */
 function onReleaseNotes() {
-  bkg.openSingletonPage(chrome.extension.getURL('updates.html'));
+  bkg.controller.openSingletonPage(chrome.extension.getURL('updates.html'));
 }
 
 /**
@@ -33,6 +36,9 @@ function onClose() {
 function onRestore() {
   // Restore settings.
   $('version').innerHTML = ' (v' + bkg.settings.version + ')';
+  
+  // Load Approver Options UI.
+  approverOptions.bindUI();
   
   // Debug
   var debugElement = $('debug');
@@ -53,7 +59,7 @@ function onRestore() {
   positionElement.add(createPositionOption('Stretch'));
   positionElement.add(createPositionOption('Center'));
   positionElement.add(createPositionOption('Tile'));
-  if (bkg.isWindows7()) {
+  if (bkg.controller.isWindows7()) {
     positionElement.add(createPositionOption('Fill'));
     positionElement.add(createPositionOption('Fit'));
   }
@@ -72,6 +78,7 @@ function onRestore() {
     bkg.settings.user_interface = value;
   }, false);
   setUserInterfaceNote(bkg.settings.user_interface);
+
 }
 
 /**

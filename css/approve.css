@@ -1,0 +1,34 @@
+body {
+  font-family: Arial, Helvetica, 'Helvetica Neue', Verdana, sans-serif;
+}
+h1 {
+  font-size: 18px;
+}
+#icon {
+  float: left;
+}
+#info {
+  font-size: 0.8em;
+}
+#box {
+  background-color: #eee;
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+#box-header {
+  height: 40px;
+}
+#name {
+  line-height: 40px;
+  height: 40px;
+  font-weight: bold;
+  margin-left: 10px;
+  font-size: 14px;
+}
+#description {
+  font-size: 12px;
+  margin: 5px;
+}
+#controls {
+  margin-top: 10px;
+}
