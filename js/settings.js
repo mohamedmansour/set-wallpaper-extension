@@ -16,7 +16,7 @@ settings = {
   },
   get user_interface() {
     var key = localStorage['user_interface'];
-    return (typeof key == 'undefined') ? 'newtab' : key;
+    return (typeof key == 'undefined') ? 'overlay' : key;
   },
   set user_interface(val) {
     localStorage['user_interface'] = val;
