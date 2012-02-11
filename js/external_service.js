@@ -96,9 +96,15 @@ ExternalService.prototype.verify = function(extensionID, callback) {
           if (obj.location.pathname === '/approve.html') {
             obj.controller.setResponseListener(extensionInfo, function(state) {
               if (state === 'BLOCK') {
+                var blacklist = settings.blacklisted;
+                blacklist.push(extensionID);
+                settings.blacklisted = blacklist;
                 callback(false);
               }
               else if (state === 'YES') {
+                var whitelist = settings.whitelisted;
+                whitelist.push(extensionID);
+                settings.whitelisted = whitelist;
                 callback(true);
               }
               else {
