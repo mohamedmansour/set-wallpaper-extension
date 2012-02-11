@@ -17,7 +17,7 @@ function onLoad() {
  * When release notes is clicked.
  */
 function onReleaseNotes() {
-  bkg.openSingletonPage(chrome.extension.getURL('updates.html'));
+  bkg.controller.openSingletonPage(chrome.extension.getURL('updates.html'));
 }
 
 /**
@@ -53,7 +53,7 @@ function onRestore() {
   positionElement.add(createPositionOption('Stretch'));
   positionElement.add(createPositionOption('Center'));
   positionElement.add(createPositionOption('Tile'));
-  if (bkg.isWindows7()) {
+  if (bkg.controller.isWindows7()) {
     positionElement.add(createPositionOption('Fill'));
     positionElement.add(createPositionOption('Fit'));
   }
