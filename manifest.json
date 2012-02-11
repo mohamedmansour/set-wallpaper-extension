@@ -11,5 +11,5 @@
   "plugins": [{ "path": "setwallpaper_plugin.dll"}],
   "background_page": "background.html",
   "options_page": "options.html",
-  "permissions": ["contextMenus", "tabs", "http://*/*", "https://*/*"]
+  "permissions": ["contextMenus", "tabs", "management", "http://*/*", "https://*/*"]
 }

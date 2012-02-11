@@ -3,14 +3,14 @@
  *
  * @author Mohamed Mansour 2012 (http://mohamedmansour.com) 
  */
-ExtensionService = function(controller) {
+LocalService = function(controller) {
   this.controller = controller;
 };
 
 /**
  * Initializes the service.
  */
-ExtensionService.prototype.init = function() {
+LocalService.prototype.init = function() {
   chrome.extension.onRequest.addListener(this.onExtensionRequestListener.bind(this));
 };
 
@@ -19,7 +19,7 @@ ExtensionService.prototype.init = function() {
  * pages, so we have one centralized location that we deal with Plugin related
  * features.
  */
-ExtensionService.prototype.onExtensionRequestListener = function(req, sender, sendResponse) {
+LocalService.prototype.onExtensionRequestListener = function(req, sender, sendResponse) {
   if (req.method == 'SetWallpaper') {
     this.controller.getPlugin().setWallpaper(req.data.image, req.data.position);
     sendResponse({});

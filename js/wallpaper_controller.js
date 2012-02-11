@@ -14,7 +14,8 @@ WallpaperController = function() {
   this.contextMenuController = new ContextMenuController(this);
   
   // Services we are using.
-  this.extensionService = new ExtensionService(this);
+  this.localService = new LocalService(this);
+  this.externalService = new ExternalService(this);
 };
 
 /**
@@ -23,7 +24,8 @@ WallpaperController = function() {
 WallpaperController.prototype.init = function() {
   this.tabRemovalController.init();
   this.contextMenuController.init();
-  this.extensionService.init();
+  this.localService.init();
+  this.externalService.init();
   this.initializePlugin();
 };
 
