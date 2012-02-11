@@ -72,6 +72,28 @@ function onRestore() {
     bkg.settings.user_interface = value;
   }, false);
   setUserInterfaceNote(bkg.settings.user_interface);
+
+  // Whitelisted
+  var whitelistedList = bkg.settings.whitelisted;
+  var whitelistedElement = $('whitelisted_list');
+  for (var i = 0; i < whitelistedList.length; i++) {
+    whitelistedElement.add(new Option(whitelistedList[i]));
+  }
+  whitelistedElement.addEventListener('change', function(e) {
+    var value = this.options[this.selectedIndex].value;
+    bkg.settings.whitelisted = value;
+  });
+
+  // Blacklisted
+  var blacklistedList = bkg.settings.blacklisted;
+  var blacklistedElement = $('blacklisted_list');
+  for (var i = 0; i < blacklistedList.length; i++) {
+    blacklistedElement.add(new Option(blacklistedList[i]));
+  }
+  blacklistedElement.addEventListener('change', function(e) {
+    var value = this.options[this.selectedIndex].value;
+    bkg.settings.blacklisted = value;
+  });
 }
 
 /**

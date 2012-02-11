@@ -35,4 +35,22 @@ settings = {
   set opt_out(val) {
     localStorage['opt_out'] = val;
   },
+  get whitelisted() {
+    var key = localStorage['whitelisted'];
+    return (typeof key == 'undefined') ? [] : (key == '' ? [] : key.split(', '));
+  },
+  set whitelisted(val) {
+    if (typeof val == 'object') {
+      localStorage['whitelisted'] = val.sort().join(', ');
+    }
+  },
+  get blacklisted() {
+    var key = localStorage['blacklisted'];
+    return (typeof key == 'undefined') ? [] : (key == '' ? [] : key.split(', '));
+  },
+  set blacklisted(val) {
+    if (typeof val == 'object') {
+      localStorage['blacklisted'] = val.sort().join(', ');
+    }
+  },
 };

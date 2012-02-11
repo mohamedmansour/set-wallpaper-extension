@@ -51,6 +51,31 @@
         </div>
       </div>
       <div class="extension-template">
+        <div class="extension-header">Extension API Management</div>
+        <div class="extension-options">
+          <p>Remember, the extensions in the whitelist will have access to the wallpaper
+             plugin, where as extensions in the blacklist are blocked.</p>
+          <dl>
+            <dt>Whitelisted <br>(Allowed to set wallpaper):</dt>
+            <dd>
+              <select id="whitelisted_list" size="8"></select>
+              <button id="whitelisted-list-add">Add</button>
+              <button id="whitelisted-list-remove">Remove</button>
+              <button id="whitelisted-list-remove-all">Remove All</button>
+              <div class="clear"></div>
+            </dd>
+            <dt>Blacklisted <br>(NOT allowed to set wallpaper):</dt>
+            <dd>
+              <select id="blacklisted_list" size="8"></select>
+              <button id="blacklisted-list-add">Add</button>
+              <button id="blacklisted-list-remove">Remove</button>
+              <button id="blacklisted-list-remove-all">Remove All</button>
+              <div class="clear"></div>
+            </dd>
+          </dl>
+        </div>
+      </div>
+      <div class="extension-template">
         <div class="extension-header">Debugging</div>
         <div class="extension-options">
           <p>To report a bug to the developer, please enable the debugger below,
