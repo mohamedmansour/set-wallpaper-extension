@@ -14,6 +14,7 @@ WallpaperController = function() {
   this.contextMenuController = new ContextMenuController(this);
   
   // Services we are using.
+  this.pluginService = new PluginService(this);
   this.localService = new LocalService(this);
   this.externalService = new ExternalService(this);
 };
@@ -24,9 +25,16 @@ WallpaperController = function() {
 WallpaperController.prototype.init = function() {
   this.tabRemovalController.init();
   this.contextMenuController.init();
+  this.pluginService.init();
   this.localService.init();
   this.externalService.init();
-  this.initializePlugin();
+};
+
+/**
+ * Fetches the plugin service instance.
+ */
+WallpaperController.prototype.getPluginService = function() {
+  return this.pluginService;
 };
 
 /**
@@ -85,34 +93,6 @@ WallpaperController.prototype.onUpdate = function() {
     //chrome.tabs.create({url: 'updates.html'});
   }
 };
-
-/**
- * Get an instance of a guaranteed living plugin. If its dead (undefined) then
- * bring it back from the dead by removing/adding it back to the DOM.
- */
-WallpaperController.prototype.getPlugin = function() {
-  // Check if plugin somehow crashed, most likely due to some internal error.
-  // Lets just reload it since some images might work.
-  var plugin = document.getElementById('pluginobj');
-  if (plugin.debug == 'undefined') {
-    var parent = plugin.parentNode;;
-    parent.removeChild(plugin);
-    parent.appendChild(plugin);
-    this.initializePlugin(plugin);
-  }
-  return plugin;
-};
-
-/**
- * Initialized Plugin with defaults.
- *
- * @param {Embed} opt_plugin Optional plugin to use instead.
- */
-WallpaperController.prototype.initializePlugin = function(opt_plugin) {
-  var plugin = opt_plugin || this.getPlugin();
-  plugin.debug = settings.debug;
-};
-
 /**
  * Lets check if we are currently on Windows7 since we have new properties
  * to expose.

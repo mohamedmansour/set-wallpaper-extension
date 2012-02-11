@@ -29,7 +29,7 @@ ContextMenuController.prototype.onImageMenuClicked = function(info, tab) {
   if (settings.user_interface == 'none') {
     // No interface present, just set the wallpaper directly with the
     // stored position in options.
-    this.controller.getPlugin().setWallpaper(info.srcUrl, PositionEnum.valueOf(settings.position));
+    this.controller.getPluginService().setWallpaper(info.srcUrl, PositionEnum.valueOf(settings.position));
   }
   else { // overlay
     // Save the URL that was just right clicked. There is no way to transfer

@@ -21,11 +21,11 @@ LocalService.prototype.init = function() {
  */
 LocalService.prototype.onExtensionRequestListener = function(req, sender, sendResponse) {
   if (req.method == 'SetWallpaper') {
-    this.controller.getPlugin().setWallpaper(req.data.image, req.data.position);
+    this.controller.getPluginService().setWallpaper(req.data.image, req.data.position);
     sendResponse({});
   }
   else if (req.method == 'GetSystemColor') {
-    sendResponse({color: this.controller.getPlugin().systemColor()});
+    sendResponse({color: this.controller.getPluginService().getSystemColor()});
   }
   else if (req.method == 'OpenOptions') {
     this.controller.openSingletonPage(chrome.extension.getURL('/options.html'));
