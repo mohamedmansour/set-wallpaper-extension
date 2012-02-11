@@ -1,5 +1,5 @@
 /**
- * Approver option component. That shows two list boxes for white list
+ * Approval option component. That shows two list boxes for white list
  * and black list.
  *
  * Notes:
@@ -26,28 +26,28 @@
  *
  * @author Mohamed Mansour 2012 (http://mohamedmansour.com) 
  */
-ApproverOptions = function() {
+ApprovalOptions = function() {
 };
-ApproverOptions.BLACKLISTED_ID = 'blacklisted';
-ApproverOptions.WHITELISTED_ID = 'whitelisted';
+ApprovalOptions.BLACKLISTED_ID = 'blacklisted';
+ApprovalOptions.WHITELISTED_ID = 'whitelisted';
 
 /**
  * Initializes the events for this approver option.
  */
-ApproverOptions.prototype.init = function() {
-  $(ApproverOptions.WHITELISTED_ID +'-list-remove').addEventListener('click', this.onListRemove.bind(this), false);
-  $(ApproverOptions.WHITELISTED_ID +'-list-remove-all').addEventListener('click', this.onListRemoveAll.bind(this), false);
-  $(ApproverOptions.BLACKLISTED_ID +'-list-remove').addEventListener('click', this.onListRemove.bind(this), false);
-  $(ApproverOptions.BLACKLISTED_ID +'-list-remove-all').addEventListener('click', this.onListRemoveAll.bind(this), false);
+ApprovalOptions.prototype.init = function() {
+  $(ApprovalOptions.WHITELISTED_ID +'-list-remove').addEventListener('click', this.onListRemove.bind(this), false);
+  $(ApprovalOptions.WHITELISTED_ID +'-list-remove-all').addEventListener('click', this.onListRemoveAll.bind(this), false);
+  $(ApprovalOptions.BLACKLISTED_ID +'-list-remove').addEventListener('click', this.onListRemove.bind(this), false);
+  $(ApprovalOptions.BLACKLISTED_ID +'-list-remove-all').addEventListener('click', this.onListRemoveAll.bind(this), false);
 };
 
 /**
  * Binds the UI to the data from the backend.
  */
-ApproverOptions.prototype.bindUI = function() {
+ApprovalOptions.prototype.bindUI = function() {
   // Whitelisted
   var whitelistedList = bkg.settings.whitelisted;
-  var whitelistedElement = $(ApproverOptions.WHITELISTED_ID + '_list');
+  var whitelistedElement = $(ApprovalOptions.WHITELISTED_ID + '_list');
   for (var i = 0; i < whitelistedList.length; i++) {
     var item = whitelistedList[i];
     whitelistedElement.add(new Option(item.substring(item.indexOf(':'))));
@@ -59,7 +59,7 @@ ApproverOptions.prototype.bindUI = function() {
 
   // Blacklisted
   var blacklistedList = bkg.settings.blacklisted;
-  var blacklistedElement = $(ApproverOptions.BLACKLISTED_ID + '_list');
+  var blacklistedElement = $(ApprovalOptions.BLACKLISTED_ID + '_list');
   for (var i = 0; i < blacklistedList.length; i++) {
     var item = blacklistedList[i];
     blacklistedElement.add(new Option(item.substring(item.indexOf(':'))));
@@ -73,7 +73,7 @@ ApproverOptions.prototype.bindUI = function() {
 /**
  * Fired when a single item in the list is removed.
  */
-ApproverOptions.prototype.onListRemove = function(e) {
+ApprovalOptions.prototype.onListRemove = function(e) {
   var id = this.getListType(e);
   var list = $(id + '_list');
   if (list.selectedIndex != -1) {
@@ -88,7 +88,7 @@ ApproverOptions.prototype.onListRemove = function(e) {
 /**
  * Fired when all the items in the list are removed.
  */
-ApproverOptions.prototype.onListRemoveAll = function(e) {
+ApprovalOptions.prototype.onListRemoveAll = function(e) {
   var id = this.getListType(e);
   bkg.settings[id] = [];
   var list = $(id + '_list');
@@ -102,10 +102,10 @@ ApproverOptions.prototype.onListRemoveAll = function(e) {
  *
  * @return {string} The ID of the list.
  */
-ApproverOptions.prototype.getListType = function(e) {
-  var id = ApproverOptions.BLACKLISTED_ID;
-  if (e.target.id.indexOf(ApproverOptions.WHITELISTED_ID) == 0) {
-    id = ApproverOptions.WHITELISTED_ID;
+ApprovalOptions.prototype.getListType = function(e) {
+  var id = ApprovalOptions.BLACKLISTED_ID;
+  if (e.target.id.indexOf(ApprovalOptions.WHITELISTED_ID) == 0) {
+    id = ApprovalOptions.WHITELISTED_ID;
   }
   return id;
 };

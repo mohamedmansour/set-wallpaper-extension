@@ -1,8 +1,8 @@
 /**
- * Approver service which is in charge of authenticating the approvals coming
+ * Approval service which is in charge of authenticating the approvals coming
  * from the external extensions.
  */
-ApproverService = function() {
+ApprovalService = function() {
   this.success = null;
   this.denied = null;
 };
@@ -13,7 +13,7 @@ ApproverService = function() {
  * @param {Function} successCallback when something has been approved or whitelisted.
  * @param {Function} deniedCallback when something has been denied or blacklisted.
  */
-ApproverService.prototype.init = function(successCallback, deniedCallback) {
+ApprovalService.prototype.init = function(successCallback, deniedCallback) {
   this.success = successCallback;
   this.denied = deniedCallback;
   chrome.extension.onRequestExternal.addListener(this.onRequestExternalListener.bind(this));
@@ -26,7 +26,7 @@ ApproverService.prototype.init = function(successCallback, deniedCallback) {
  * @param {object} sender The initiator who sent this request.
  * @param {Function<object>} sendResponse The callback to send back.
  */
-ApproverService.prototype.onRequestExternalListener = function(request, sender, sendResponse) {
+ApprovalService.prototype.onRequestExternalListener = function(request, sender, sendResponse) {
   var extensionID = sender.id;
   if (!this.contains(settings.whitelisted, extensionID)) {
     if (this.contains(settings.blacklisted, extensionID)) {
@@ -54,7 +54,7 @@ ApproverService.prototype.onRequestExternalListener = function(request, sender, 
  * @param {Array<string>} list The list of extension ids.
  * @param {string} extensionID The extension ID.
  */
-ApproverService.prototype.contains = function(list, extensionID) {
+ApprovalService.prototype.contains = function(list, extensionID) {
   var found = false;
   list.some(function(elt) {
     var i = elt.indexOf(':');
@@ -70,16 +70,16 @@ ApproverService.prototype.contains = function(list, extensionID) {
  * @param {string} extensionID The extension ID.
  * @param {Function<object>} callback The callback to send back when verified.
  */
-ApproverService.prototype.verify = function(extensionID, callback) {
+ApprovalService.prototype.verify = function(extensionID, callback) {
   chrome.management.get(extensionID, function(extensionInfo) {
     chrome.windows.create({
-        url: 'approver.html#' + extensionID,
+        url: 'approval.html#' + extensionID,
         type: 'popup',
         width: 600,
         height: 275
       }, function(win) {
         chrome.extension.getViews({type: 'tab'}).some(function(obj) {
-          if (obj.location.pathname === '/approver.html') {
+          if (obj.location.pathname === '/approval.html') {
             obj.controller.setResponseListener(extensionInfo, function(state) {
               if (state === 'BLOCK') {
                 var blacklist = settings.blacklisted;

@@ -3,7 +3,7 @@
  */
 ExternalService = function(controller) {
   this.controller = controller;
-  this.approverService = new ApproverService();
+  this.approvalService = new ApprovalService();
 };
 
 ExternalService.URL_PATTERN = new RegExp(/[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi);
@@ -12,7 +12,7 @@ ExternalService.URL_PATTERN = new RegExp(/[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-
  * Initializes the service.
  */
 ExternalService.prototype.init = function() {
-  this.approverService.init(this.success.bind(this), this.denied.bind(this));
+  this.approvalService.init(this.success.bind(this), this.denied.bind(this));
 };
 
 /**

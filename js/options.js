@@ -1,7 +1,7 @@
 // Extensions pages can all have access to the bacground page.
 var bkg = chrome.extension.getBackgroundPage();
 
-var approverOptions = new ApproverOptions();
+var approvalOptions = new ApprovalOptions();
 
 // When the DOM is loaded, make sure all the saved info is restored.
 window.addEventListener('load', onLoad, false);
@@ -13,7 +13,7 @@ function onLoad() {
   onRestore();
   $('button-close').addEventListener('click', onClose, false);
   $('release-notes').addEventListener('click', onReleaseNotes, false);
-  approverOptions.init();
+  approvalOptions.init();
 }
 
 /**
@@ -37,8 +37,8 @@ function onRestore() {
   // Restore settings.
   $('version').innerHTML = ' (v' + bkg.settings.version + ')';
   
-  // Load Approver Options UI.
-  approverOptions.bindUI();
+  // Load Approval Options UI.
+  approvalOptions.bindUI();
   
   // Debug
   var debugElement = $('debug');
