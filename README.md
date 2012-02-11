@@ -6,6 +6,12 @@ allows you to set that image as a wallpaper. It allows you to change the style
 of the wallpaper by simply pressing one of the TILE, CENTER, STRETCH, FILL, and
 FIT types.
 
+Contributors
+-------------
+
+- Mohamed Mansour (Maintainer, Lead developer) - https://plus.google.com/116805285176805120365/posts
+- Edwin Vane (Developer, build system, plugin enhancements) - https://plus.google.com/106364473100192535271/posts
+                                               - 
 How does it work?
 ----------------
 It uses the Google Chrome Extension API to inject context menus to every image.
