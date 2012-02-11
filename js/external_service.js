@@ -71,8 +71,9 @@ ExternalService.prototype.denied = function(extensionID, request, sendResponse) 
  */
 ExternalService.prototype.contains = function(list, extensionID) {
   var found = false;
-  list.some(function(elt, idx) {
-    found = (elt == extensionID);
+  list.some(function(elt) {
+    var i = elt.indexOf(':');
+    found = (elt.substring(0, i) == extensionID);
     return found;
   });
   return found;
