@@ -87,23 +87,23 @@ ExternalService.prototype.contains = function(list, extensionID) {
 ExternalService.prototype.verify = function(extensionID, callback) {
   chrome.management.get(extensionID, function(extensionInfo) {
     chrome.windows.create({
-        url: 'approve.html#' + extensionID,
+        url: 'approver.html#' + extensionID,
         type: 'popup',
         width: 600,
         height: 275
       }, function(win) {
         chrome.extension.getViews({type: 'tab'}).some(function(obj) {
-          if (obj.location.pathname === '/approve.html') {
+          if (obj.location.pathname === '/approver.html') {
             obj.controller.setResponseListener(extensionInfo, function(state) {
               if (state === 'BLOCK') {
                 var blacklist = settings.blacklisted;
-                blacklist.push(extensionID);
+                blacklist.push(extensionID + ':' + extensionInfo.name.replace(/,/g, ' '));
                 settings.blacklisted = blacklist;
                 callback(false);
               }
               else if (state === 'YES') {
                 var whitelist = settings.whitelisted;
-                whitelist.push(extensionID);
+                whitelist.push(extensionID + ':' + extensionInfo.name.replace(/,/g, ' '));
                 settings.whitelisted = whitelist;
                 callback(true);
               }

@@ -2,17 +2,16 @@
  * Approver Controller, manages the state of the callback so it
  * can send a notification back to the consumer.
  *
- *
  * @author Mohamed Mansour 2012 (http://mohamedmansour.com)
  */
-ApproveController = function() {
+ApproverController = function() {
   this.callback = null;
 };
 
 /**
  * Initializes the button events.
  */
-ApproveController.prototype.init = function() {
+ApproverController.prototype.init = function() {
   $('yes').addEventListener('click', this.onYes.bind(this), false);
   $('no').addEventListener('click', this.onNo.bind(this), false);
   $('block').addEventListener('click', this.onBlock.bind(this), false);
@@ -21,7 +20,7 @@ ApproveController.prototype.init = function() {
 /**
  * Sets the response listener for the callback for this approval.
  */
-ApproveController.prototype.setResponseListener = function(extensionInfo, callback) {
+ApproverController.prototype.setResponseListener = function(extensionInfo, callback) {
   $('description').innerText = extensionInfo.description;
   $('name').innerText = extensionInfo.name;
   $('icon').src = extensionInfo.icons[extensionInfo.icons.length - 1].url;
@@ -31,7 +30,7 @@ ApproveController.prototype.setResponseListener = function(extensionInfo, callba
 /**
  * Fired when pressed YES.
  */
-ApproveController.prototype.onYes = function() {
+ApproverController.prototype.onYes = function() {
   this.callback('YES');
   window.close();
 };
@@ -39,7 +38,7 @@ ApproveController.prototype.onYes = function() {
 /**
  * Fired when pressed NO.
  */
-ApproveController.prototype.onNo = function() {
+ApproverController.prototype.onNo = function() {
   this.callback('NO');
   window.close();
 };
@@ -47,7 +46,7 @@ ApproveController.prototype.onNo = function() {
 /**
  * Fired when pressed BLOCK.
  */
-ApproveController.prototype.onBlock = function() {
+ApproverController.prototype.onBlock = function() {
   this.callback('BLOCK');
   window.close();
 };

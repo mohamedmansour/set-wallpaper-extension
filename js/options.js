@@ -1,6 +1,8 @@
 // Extensions pages can all have access to the bacground page.
 var bkg = chrome.extension.getBackgroundPage();
 
+var approverOptions = new ApproverOptions();
+
 // When the DOM is loaded, make sure all the saved info is restored.
 window.addEventListener('load', onLoad, false);
 
@@ -11,6 +13,7 @@ function onLoad() {
   onRestore();
   $('button-close').addEventListener('click', onClose, false);
   $('release-notes').addEventListener('click', onReleaseNotes, false);
+  approverOptions.init();
 }
 
 /**
@@ -33,6 +36,9 @@ function onClose() {
 function onRestore() {
   // Restore settings.
   $('version').innerHTML = ' (v' + bkg.settings.version + ')';
+  
+  // Load Approver Options UI.
+  approverOptions.bindUI();
   
   // Debug
   var debugElement = $('debug');
@@ -73,27 +79,6 @@ function onRestore() {
   }, false);
   setUserInterfaceNote(bkg.settings.user_interface);
 
-  // Whitelisted
-  var whitelistedList = bkg.settings.whitelisted;
-  var whitelistedElement = $('whitelisted_list');
-  for (var i = 0; i < whitelistedList.length; i++) {
-    whitelistedElement.add(new Option(whitelistedList[i]));
-  }
-  whitelistedElement.addEventListener('change', function(e) {
-    var value = this.options[this.selectedIndex].value;
-    bkg.settings.whitelisted = value;
-  });
-
-  // Blacklisted
-  var blacklistedList = bkg.settings.blacklisted;
-  var blacklistedElement = $('blacklisted_list');
-  for (var i = 0; i < blacklistedList.length; i++) {
-    blacklistedElement.add(new Option(blacklistedList[i]));
-  }
-  blacklistedElement.addEventListener('change', function(e) {
-    var value = this.options[this.selectedIndex].value;
-    bkg.settings.blacklisted = value;
-  });
 }
 
 /**
