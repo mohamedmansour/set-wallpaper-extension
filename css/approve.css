@@ -27,6 +27,7 @@ h1 {
 }
 #description {
   font-size: 12px;
+  margin: 5px;
 }
 #controls {
   margin-top: 10px;

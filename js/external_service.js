@@ -87,19 +87,28 @@ ExternalService.prototype.contains = function(list, extensionID) {
 ExternalService.prototype.verify = function(extensionID, callback) {
   chrome.management.get(extensionID, function(extensionInfo) {
     chrome.windows.create({
-        url: 'approve.html',
+        url: 'approve.html#' + extensionID,
         type: 'popup',
         width: 600,
         height: 275
       }, function(win) {
-      chrome.extension.sendRequest({
-        service: 'ApprovalRequester',
-        data: extensionInfo
-      });
-      console.log(extensionInfo);
-      //win.controller.setResponseListener(extensionInfo, function(verified) {
-      //  callback(true);
-      //});
+        chrome.extension.getViews({type: 'tab'}).some(function(obj) {
+          if (obj.location.pathname === '/approve.html') {
+            obj.controller.setResponseListener(extensionInfo, function(state) {
+              if (state === 'BLOCK') {
+                callback(false);
+              }
+              else if (state === 'YES') {
+                callback(true);
+              }
+              else {
+                callback(false);
+              }
+            });
+            return true;
+          }
+          return false;
+        });
     });
-  });
+  }.bind(this));
 };
