@@ -23,63 +23,70 @@ function viewOptions() {
 </head>
 
 <body onload="displayVersion()"> 
-  <form onsubmit="return false;">
   <div id="body-container">
     <div id="header">
       <h1>Set Wallpaper Updated!<em id="version"></em></h1>
+      <p>
+        This message only exists to notify you when brand new features exists, if 
+        you wish to <strong>opt-out</strong>, please visit 
+        <a href="#" onclick="viewOptions()">options</a> and disable <strong>notify
+        new features</strong> from one of the items.
+      </p>
+      <p>
+        You should follow me on <a href="https://plus.google.com/116805285176805120365/posts">Google+</a> or <a href="http://twitter.com/mohamedmansour">@mohamedmansour</a>
+      </p>
     </div>
-    <p>
-      This message only exists to notify you when brand new features exists, if 
-      you wish to <strong>opt-out</strong>, please visit 
-      <a href="#" onclick="viewOptions()">options</a> and disable <strong>notify
-      new features</strong> from one of the items.<br/><br/>
-      You should follow me on Twitter <a href="http://twitter.com/mohamedmansour">@mohamedmansour</a>
-    </p>
-    <div class="extension-template">
-      <div class="extension-header">Version 2.0.1</div>
-      <div class="extension-options">
-        <ul>
-          <li><strong>Bugfix:</strong> Outstanding bug finally fixed. For slower machines, preview overlay goes to blank. No preview was being shown.</li>
-        </ul>
+    <div id="main">
+      <div class="extension-template">
+        <div class="extension-header">Version 2.0.1</div>
+        <div class="extension-options">
+          <ul>
+            <li><strong>Bugfix:</strong> Outstanding bug finally fixed. For slower machines, preview overlay goes to blank. No preview was being shown.</li>
+          </ul>
+        </div>
       </div>
-      <div class="extension-header">Version 2.0</div>
-      <div class="extension-options">
-        <ul>
-          <li><strong>Feature:</strong> Overlay is the new user interface for setting wallpaper.</li>
-          <li><strong>Feature:</strong> Windows 7 users will take advantage of Fill and Fit wallpaper modes. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/12">issue12</a></li>
-          <li><strong>Bugfix:</strong> After restart wallpaper goes black. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/3">issue3</a></li>
-          <li><strong>Bugfix:</strong> Made private plugin to the extension namespace.</li>
-        </ul>
+      <div class="extension-template">
+        <div class="extension-header">Version 2.0</div>
+        <div class="extension-options">
+          <ul>
+            <li><strong>Feature:</strong> Overlay is the new user interface for setting wallpaper.</li>
+            <li><strong>Feature:</strong> Windows 7 users will take advantage of Fill and Fit wallpaper modes. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/12">issue12</a></li>
+            <li><strong>Bugfix:</strong> After restart wallpaper goes black. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/3">issue3</a></li>
+            <li><strong>Bugfix:</strong> Made private plugin to the extension namespace.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="extension-template">
+        <div class="extension-header">Version 1.2.4</div>
+        <div class="extension-options">
+          <ul>
+            <li><strong>Feature:</strong> Adds a new user interface, which is 'None' to options. Allows you to automatically set the wallpaper without the preview. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/5">issue5</a></li>
+            <li><strong>Feature:</strong> You can now set a default position (Tile / Stretch / Center) in options. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/4">issue4</a></li>
+            <li><strong>Bugfix:</strong> Update icons to images that are legally allowed. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/3">issue3</a></li>
+            <li><strong>Bugfix:</strong> Change opt-in default settings to be off. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/8">issue8</a></li>
+            <li><strong>Bugfix:</strong> Preview should respect proper screen aspect ratio. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/7">issue7</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="extension-template">
+        <div class="extension-header">Version 1.0.0</div>
+        <div class="extension-options">
+          <ul>
+            <li>Initial Release</li>
+          </ul>
+        </div>
       </div>
     </div>
-    <div class="extension-template">
-      <div class="extension-header">Version 1.2.4</div>
-      <div class="extension-options">
-        <ul>
-          <li><strong>Feature:</strong> Adds a new user interface, which is 'None' to options. Allows you to automatically set the wallpaper without the preview. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/5">issue5</a></li>
-          <li><strong>Feature:</strong> You can now set a default position (Tile / Stretch / Center) in options. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/4">issue4</a></li>
-          <li><strong>Bugfix:</strong> Update icons to images that are legally allowed. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/3">issue3</a></li>
-          <li><strong>Bugfix:</strong> Change opt-in default settings to be off. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/8">issue8</a></li>
-          <li><strong>Bugfix:</strong> Preview should respect proper screen aspect ratio. <a href="http://github.com/mohamedmansour/set-wallpaper-extension/issues/issue/7">issue7</a></li>
-        </ul>
+    <div id="footer">
+      <div id="buttons">
+        <button onclick="window.close();">Close</button>
       </div>
-    </div>
-    <div class="extension-template">
-      <div class="extension-header">Version 1.0.0</div>
-      <div class="extension-options">
-        <ul>
-          <li>Initial Release</li>
-        </ul>
+      <div id="credits">
+        <a href="#" id="release-notes">Release Notes</a>, 
+        Extension developed by <a href="http://mohamedmansour.com">Mohamed Mansour</a>, 
+        Source Code available in <a href="http://github.com/mohamedmansour/set-wallpaper-extension">GitHub</a>
       </div>
-    </div>
-    <div id="extension-footer">
-      <button onclick="window.close();">Close</button>
-    </div>
-    <div id="credits">
-      Extension developed by <a href="http://www.mohamedmansour.com">Mohamed Mansour</a>, 
-      Source Code available in <a href="http://github.com/mohamedmansour/set-wallpaper-extension">GitHub</a>
     </div>
   </div>
-  </form>
 </body>
 </html>

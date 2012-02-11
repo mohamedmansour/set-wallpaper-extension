@@ -11,6 +11,14 @@ function onLoad() {
   onRestore();
   $('button-save').addEventListener('click', onSave, false);
   $('button-close').addEventListener('click', onClose, false);
+  $('release-notes').addEventListener('click', onReleaseNotes, false);
+}
+
+/**
+ * When release notes is clicked.
+ */
+function onReleaseNotes() {
+  bkg.openSingletonPage(chrome.extension.getURL('updates.html'));
 }
 
 /**

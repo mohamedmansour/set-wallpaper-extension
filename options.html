@@ -2,78 +2,85 @@
 <html>
 <head>
   <title>Set Wallpaper Options</title>
+  <link rel="stylesheet" type="text/css" href="/css/common.css">
   <link rel="stylesheet" type="text/css" href="/css/options.css">
+  <link rel="stylesheet" type="text/css" href="/css/options_custom.css">
   <script type="text/javascript" src="/js/functions.js"></script>
   <script type="text/javascript" src="/js/options.js"></script>
 </head>
 <body> 
-  <form onsubmit="return false;">
   <div id="body-container">
     <div id="header">
       <h1>Set Wallpaper Options<em id="version"></em></h1>
+      <p>
+        Make sure you save the settings after your done editing!
+        <a
+         href="https://chrome.google.com/webstore/detail/ddkmiidlgnkhnfhigdpadkaamogngkin">
+         Visit extension page
+        </a>,
+        <a
+         href="http://groups.google.com/group/mohamedmansour-extensions">
+         File bugs and suggestions
+        </a>
+      </p>
+      <p>
+        You should follow me on <a href="https://plus.google.com/116805285176805120365/posts">Google+</a> or <a href="http://twitter.com/mohamedmansour">@mohamedmansour</a>
+      </p>
     </div>
-    <p>
-      Make sure you save the settings after your done editing!
-      <a
-       href="https://chrome.google.com/webstore/detail/ddkmiidlgnkhnfhigdpadkaamogngkin">
-       Visit extension page
-      </a>,
-      <a
-       href="http://groups.google.com/group/mohamedmansour-extensions">
-       File bugs and suggestions
-      </a><br/><br/>
-      You should follow me on Twitter <a href="http://twitter.com/mohamedmansour">@mohamedmansour</a>
-    </p>
-    <div class="extension-template">
-      <div class="extension-header">General</div>
-      <div class="extension-options">
-        <p>Remember, if you use no user interface (set it to None)
-           the only way to visit this page again is through Tools > Extensions.</p>
-        <dl>
-          <dt>User interface:</dt>
-          <dd>
-            <select id="user_interface">
-              <option value="overlay">Overlay</option>
-              <option value="none">None</option>
-            </select>
-            <span class="note" id="user_interface_note"></span>
-          </dd>
-          <dt>Default position:</dt>
-          <dd>
-            <select id="position"></select>
-          </dd>
-          <dt>Opt-Out of future notifications:</dt>
-          <dd>
-            <label for="opt_out"><input type="checkbox" id="opt_out" /></label>
-          </dd>
-        </dl>
+    <div id="main">
+      <div class="extension-template">
+        <div class="extension-header">General</div>
+        <div class="extension-options">
+          <p>Remember, if you use no user interface (set it to None)
+             the only way to visit this page again is through Tools > Extensions.</p>
+          <dl>
+            <dt>User interface:</dt>
+            <dd>
+              <select id="user_interface">
+                <option value="overlay">Overlay</option>
+                <option value="none">None</option>
+              </select>
+              <span class="note" id="user_interface_note"></span>
+            </dd>
+            <dt>Default position:</dt>
+            <dd>
+              <select id="position"></select>
+            </dd>
+            <dt>Opt-Out of future notifications:</dt>
+            <dd>
+              <label for="opt_out"><input type="checkbox" id="opt_out" /></label>
+            </dd>
+          </dl>
+        </div>
+      </div>
+      <div class="extension-template">
+        <div class="extension-header">Debugging</div>
+        <div class="extension-options">
+          <p>To report a bug to the developer, please enable the debugger below,
+             and it will post the debug messages to the "background.html"
+             inspector located in chrome://extensions when you click on it on the
+             console tab. Once you're done reporting, you can uncheck it.</p>
+          <dl>
+            <dt>Show on console:</dt>
+            <dd>
+              <label for="debug"><input type="checkbox" id="debug" /></label>
+            </dd>
+          </dl>
+        </div>
       </div>
     </div>
-    <div class="extension-template">
-      <div class="extension-header">Debugging</div>
-      <div class="extension-options">
-        <p>To report a bug to the developer, please enable the debugger below,
-           and it will post the debug messages to the "background.html"
-           inspector located in chrome://extensions when you click on it on the
-           console tab. Once you're done reporting, you can uncheck it.</p>
-        <dl>
-          <dt>Show on console:</dt>
-          <dd>
-            <label for="debug"><input type="checkbox" id="debug" /></label>
-          </dd>
-        </dl>
+    <div id="footer">
+      <div id="buttons">
+        <span id="info-message">Options saved!</span>
+        <button id="button-save">Save</button>
+        <button id="button-close">Close</button>
       </div>
-    </div>
-    <div id="extension-footer">
-      <span id="info-message">Options saved!</span>
-      <button id="button-save">Save</button>
-      <button id="button-close">Close</button>
-    </div>
-    <div id="credits">
-      Extension developed by <a href="http://www.mohamedmansour.com">Mohamed Mansour</a>, 
-      Source Code available in <a href="http://github.com/mohamedmansour/set-wallpaper-extension">GitHub</a>
+      <div id="credits">
+        <a href="#" id="release-notes">Release Notes</a>, 
+        Extension developed by <a href="http://mohamedmansour.com">Mohamed Mansour</a>, 
+        Source Code available in <a href="http://github.com/mohamedmansour/set-wallpaper-extension">GitHub</a>
+      </div>
     </div>
   </div>
-  </form>
 </body>
 </html>
