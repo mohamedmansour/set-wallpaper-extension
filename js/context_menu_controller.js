@@ -1,5 +1,7 @@
 /**
  * Manages the context menu for the extension.
+ *
+ * @author Mohamed Mansour 2012 (http://mohamedmansour.com) 
  */
 ContextMenuController = function(controller) {
   this.controller = controller;

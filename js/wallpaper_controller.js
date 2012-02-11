@@ -1,26 +1,30 @@
+/**
+ * Main controller for the extension.
+ *
+ * @author Mohamed Mansour 2012 (http://mohamedmansour.com) 
+ */
 WallpaperController = function() {
   this.onExtensionLoad();
-
-  // Keep track of the tab position for the previewer when opened.
-  // So that it can close back to the original place.
-  this.currid = null;
-  this.newid = null;
-  this.imageCacheURL = null;
 
   // Keep track if the operating system is Windows 7. We do special stuff.
   this.win7 = null;
   
+  // Controllers for modifying state.
+  this.tabRemovalController = new TabRemovalController(this);
   this.contextMenuController = new ContextMenuController(this);
+  
+  // Services we are using.
+  this.extensionService = new ExtensionService(this);
 };
 
 /**
  * Initialization routine.
  */
 WallpaperController.prototype.init = function() {
+  this.tabRemovalController.init();
   this.contextMenuController.init();
+  this.extensionService.init();
   this.initializePlugin();
-  chrome.tabs.onRemoved.addListener(this.onTabRemovedListener.bind(this));
-  chrome.extension.onRequest.addListener(this.onExtensionRequestListener.bind(this));
 };
 
 /**
@@ -32,7 +36,6 @@ WallpaperController.prototype.onExtensionLoad = function() {
   if (currVersion != prevVersion) {
     // Update the version incase we want to do something in future.
     settings.version = currVersion;
-    
     // Check if we just installed this extension.
     if (typeof prevVersion == 'undefined') {
       this.onInstall();
@@ -42,7 +45,6 @@ WallpaperController.prototype.onExtensionLoad = function() {
     }
   }
 };
-
 
 /**
  * Open a singleton page, which means, if a page already exists, it
@@ -125,18 +127,6 @@ WallpaperController.prototype.isWindows7 = function() {
 };
 
 /**
- * Listens on tab removals. So we can get back to the tab that just opened.
- * If possible of course. Should handle moved tabs as well.
- */
-WallpaperController.prototype.onTabRemovedListener = function(tabId) {
-  if (this.newid && tabId == this.newid) {
-    chrome.tabs.update(this.currid, {selected: true})
-  } else {
-    this.newid = null; 
-  }
-};
-
-/**
  * Inject initialization data into the preview.
  *
  * Once the overlay.js file has been injected successfully, data such as OS
@@ -164,31 +154,4 @@ WallpaperController.prototype.onPreviewLoaded = function(tab) {
       position: settings.position
     }
   });
-};
-
-
-/**
- * Extension request listener, called from content scripts and the extension
- * pages, so we have one centralized location that we deal with Plugin related
- * features.
- */
-WallpaperController.prototype.onExtensionRequestListener = function(req, sender, sendResponse) {
-  if (req.method == 'SetWallpaper') {
-    this.getPlugin().setWallpaper(req.data.image, req.data.position);
-    sendResponse({});
-  }
-  else if (req.method == 'GetSystemColor') {
-    sendResponse({color: this.getPlugin().systemColor()});
-  }
-  else if (req.method == 'OpenOptions') {
-    this.openSingletonPage(chrome.extension.getURL('/options.html'));
-    sendResponse({});
-  }
-  else if (req.method == 'RemoveOverlay') {
-    var code = 'document.body.removeChild(document.querySelector("iframe#crx_wlp_iframe"))';
-    chrome.tabs.executeScript(sender.tab.id, {code: code});
-  }
-  else if (req.method == 'PreviewLoaded') {
-    this.onPreviewLoaded(sender.tab.id);
-  }
 };

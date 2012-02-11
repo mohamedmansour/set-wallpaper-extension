@@ -9,8 +9,10 @@
  * @param {string} imageURL The URL of the image to preview.
  * @param {Object<PositionEnum>} opt_position Optional position where the
  *                               default is STRETCH.
+ *
+ * @author Mohamed Mansour 2012 (http://mohamedmansour.com) 
  */
-WallpaperPreview = function(canvasID, imageURL, opt_position)
+PreviewRenderer = function(canvasID, imageURL, opt_position)
 {
   this.ctx = document.getElementById(canvasID).getContext('2d');
   this.canvas = document.getElementById(canvasID); // Need to recall it, bug.
@@ -26,7 +28,7 @@ WallpaperPreview = function(canvasID, imageURL, opt_position)
  * Get the location where the Image was fetched.
  * @return {string} The URL of the image currently viewed.
  */
-WallpaperPreview.prototype.getImageURL = function() 
+PreviewRenderer.prototype.getImageURL = function() 
 {
   return this.imageURL;
 };
@@ -35,7 +37,7 @@ WallpaperPreview.prototype.getImageURL = function()
  * The current rendered position.
  * @return {Object<PositionEnum>} The position currently visible.
  */
-WallpaperPreview.prototype.getPosition = function() 
+PreviewRenderer.prototype.getPosition = function() 
 {
   return this.position;
 };
@@ -46,7 +48,7 @@ WallpaperPreview.prototype.getPosition = function()
  * @param {boolean} opt_force A flag that denotes if we want to force the
  *                            rendering to override the caching paint sequences.
  */
-WallpaperPreview.prototype.render = function(position, opt_force) 
+PreviewRenderer.prototype.render = function(position, opt_force) 
 {
   // No need to re-render if we didn't request a new position.
   var force = opt_force || false;
@@ -83,7 +85,7 @@ WallpaperPreview.prototype.render = function(position, opt_force)
  * This comes from the Native side, which picks up your color from Windows.
  * @param {string} hex The hexadecimal color of the background canvas color.
  */
-WallpaperPreview.prototype.setCanvasBackground = function(hex)
+PreviewRenderer.prototype.setCanvasBackground = function(hex)
 {
   var background = '#' + hex;
   this.canvas.style.backgroundColor = background;
@@ -93,7 +95,7 @@ WallpaperPreview.prototype.setCanvasBackground = function(hex)
  * Buffered image callback when finished loading.
  * @private
  */
-WallpaperPreview.prototype._loadComplete = function()
+PreviewRenderer.prototype._loadComplete = function()
 {
   this.screenDimension = new Dimension(screen.width, screen.height);
   this.canvas.height = this.canvas.width / (this.screenDimension.width /
@@ -113,7 +115,7 @@ WallpaperPreview.prototype._loadComplete = function()
  * in distortion of the image as the image's aspect ratio is not retained.
  * @private
  */
-WallpaperPreview.prototype._renderStretch = function() 
+PreviewRenderer.prototype._renderStretch = function() 
 {
   this.position = PositionEnum.STRETCH;
   this._paint(0, 0, this.canvasDimension.width, this.canvasDimension.height);
@@ -125,7 +127,7 @@ WallpaperPreview.prototype._renderStretch = function()
  * or cropping image if image is larger.
  * @private
  */
-WallpaperPreview.prototype._renderCenter = function()  
+PreviewRenderer.prototype._renderCenter = function()  
 {
   this.position = PositionEnum.CENTER;
   
@@ -144,7 +146,7 @@ WallpaperPreview.prototype._renderCenter = function()
  * the screen. This uses the image in its original size.
  * @private
  */
-WallpaperPreview.prototype._renderTile = function() 
+PreviewRenderer.prototype._renderTile = function() 
 {
   this.position = PositionEnum.TILE;
   
@@ -171,7 +173,7 @@ WallpaperPreview.prototype._renderTile = function()
  * fill any screen area not covered by the image.
  * @private
  */
-WallpaperPreview.prototype._renderFill = function() 
+PreviewRenderer.prototype._renderFill = function() 
 {
   this.position = PositionEnum.FILL;
   
@@ -223,7 +225,7 @@ WallpaperPreview.prototype._renderFill = function()
  * screen.
  * @private
  */
-WallpaperPreview.prototype._renderFit = function() 
+PreviewRenderer.prototype._renderFit = function() 
 {
   this.position = PositionEnum.FIT;
 
@@ -276,7 +278,7 @@ WallpaperPreview.prototype._renderFit = function()
  * @param {number} height The maximum height of what we are painting.
  * @private
  */
-WallpaperPreview.prototype._paint = function(x, y, width, height) 
+PreviewRenderer.prototype._paint = function(x, y, width, height) 
 {
   this.ctx.drawImage(this.imageBuffer, x, y, width, height);
 };

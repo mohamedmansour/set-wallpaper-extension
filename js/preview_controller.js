@@ -8,7 +8,7 @@
  */
 PreviewController = function()
 {
-  this.preview = null;
+  this.previewRenderer = null;
 };
 
 /**
@@ -27,14 +27,15 @@ PreviewController.prototype.onMessage = function(req, sender, sendResponse)
 {
   if (req.method == 'SetImage') {
     // Startup the previewer to do its business!
-    this.preview = new WallpaperPreview('crx_wlp_canvas', req.data.image,
-                                         PositionEnum.valueOf(req.data.position));
+    this.previewRenderer = new PreviewRenderer('crx_wlp_canvas',
+                                               req.data.image,
+                                               PositionEnum.valueOf(req.data.position));
     // Send a call natively to inform the operating system about its color.
     chrome.extension.sendRequest({method: 'GetSystemColor'},
                                  this.onSystemColorChange.bind(this));
     // Set the appropriate item selected.
-    var i = $('crx_wlp_' + req.data.position + 'Button');
-    i.className = 'selected';
+    var selectedItem = $('crx_wlp_' + req.data.position + 'Button');
+    selectedItem.className = 'selected';
   }
   else if (req.method = 'IsWindows7') {
     if (req.data) {
@@ -49,7 +50,7 @@ PreviewController.prototype.onMessage = function(req, sender, sendResponse)
  */
 PreviewController.prototype.onSystemColorChange = function(res)
 {
-  this.preview.setCanvasBackground(res.color);
+  this.previewRenderer.setCanvasBackground(res.color);
 };
 
 
@@ -103,7 +104,7 @@ PreviewController.prototype.changeSelection = function(dom, position)
     list.className = '';
   }
   dom.className = 'selected';
-  this.preview.render(position);
+  this.previewRenderer.render(position);
 };
   
 /**
@@ -114,8 +115,8 @@ PreviewController.prototype.doSubmit = function()
   chrome.extension.sendRequest({
       method: 'SetWallpaper', 
       data: {
-        image: this.preview.getImageURL(),
-        position: this.preview.getPosition()
+        image: this.previewRenderer.getImageURL(),
+        position: this.previewRenderer.getPosition()
       }
   });
 };
