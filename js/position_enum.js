@@ -26,3 +26,15 @@ PositionEnum.valueOf = function(val)
 {
   return PositionEnum[val.toUpperCase()];
 };
+
+/**
+ * Checks if the ordinal is a valid one and doesn't exceed the number
+ * of positions for this enum.
+ *
+ * @param {number} ordinal The position within the map.
+ * @return {boolean} True if it lies within the same bounds otherwise false.
+ */
+PositionEnum.isValidOrdinal = function(ordinal)
+{
+  return !(isNaN(ordinal) || ordinal < 0 || ordinal > 4)
+};
