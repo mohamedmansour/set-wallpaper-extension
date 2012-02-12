@@ -55,7 +55,11 @@ bool DesktopService::GetSystemColor(NPVariant* result) {
   result->type = NPVariantType_String;
   result->value.stringValue.UTF8Characters = hex_color;
   result->value.stringValue.UTF8Length = 6;
-  SendConsole(std::string("GetSystemColor::DONE ").append(hex_color).c_str());
+  
+  std::ostringstream oss;
+  oss << "GetSystemColor::DONE  " << hex_color;
+  SendConsole(oss.str().c_str());
+
   return true;
 }
 
@@ -68,7 +72,10 @@ bool DesktopService::SetWallpaper(NPVariant* result,
                                   NPString image_url,
                                   int style) {
   SendConsole("SetWallpaper::BEGIN starting");
-  SendConsole(std::string("SetWallpaper::URL ").append(image_url.UTF8Characters).c_str());
+
+  std::ostringstream oss;
+  oss << "SetWallpaper::URL " << image_url.UTF8Characters;
+  SendConsole(oss.str().c_str());
 
   m_style = style;
 
@@ -139,6 +146,31 @@ void DesktopService::ImgArrived(NPStream* stream, const char* img_path) {
   oss << "Stream " << stream << " resulted in file downloaded to " << img_path;
   SendConsole(oss.str().c_str());
 
+  // Copy from char* to TCHAR* for SetWallpaper's benefit.
+  size_t path_len = std::strlen(img_path);
+  TCHAR* img_path_tchar = new TCHAR[path_len + 1];
+  img_path_tchar[path_len] = 0;
+  std::copy(img_path, img_path + path_len, img_path_tchar);
+
+  Image* image = new Image(img_path_tchar);
+  if (!image) {
+    SendError("Something went wrong while constructing the image.");
+    return;
+  }
+
+  // Encode it to BMP.
+  WCHAR current_path[MAX_PATH];
+  GetCurrentDirectoryW(MAX_PATH, current_path);
+  WCHAR file_name[MAX_PATH];
+  wsprintf(file_name, L"%s\\ChromeSetWallpaperExtension.bmp", current_path);
+  CLSID clsid;
+  GetEncoderClsid(L"image/bmp", &clsid);
+  if (image->Save(file_name, &clsid) != Ok) {
+    delete image;
+    return;
+  }
+  delete image;
+
   // Set the active wallpaper on the desktop.
   LPACTIVEDESKTOP active_desktop;
   WALLPAPEROPT wallpaper_options;
@@ -147,22 +179,16 @@ void DesktopService::ImgArrived(NPStream* stream, const char* img_path) {
   hr = CoCreateInstance(CLSID_ActiveDesktop, NULL, CLSCTX_INPROC_SERVER,
                         IID_IActiveDesktop, (void**)&active_desktop);
   if (FAILED(hr)) {
-    SendConsole("SetWallpaper::Creation failed!");
+    SendError("SetWallpaper::Creation failed!");
     return;
   }
 
   // Perform COM cleanup when this object goes out of scope.
   COMCleanup com_cleanup;
 
-  // Copy from char* to TCHAR* for SetWallpaper's benefit.
-  size_t path_len = std::strlen(img_path);
-  TCHAR* img_path_tchar = new TCHAR[path_len + 1];
-  img_path_tchar[path_len] = 0;
-  std::copy(img_path, img_path + path_len, img_path_tchar);
-
-  hr = active_desktop->SetWallpaper(img_path_tchar, 0);
+  hr = active_desktop->SetWallpaper(file_name, 0);
   if (FAILED(hr)) {
-    SendConsole("SetWallpaper::Image failed!");
+    SendError("SetWallpaper::Image failed!");
     return;
   }
 
@@ -170,7 +196,7 @@ void DesktopService::ImgArrived(NPStream* stream, const char* img_path) {
   wallpaper_options.dwStyle = m_style;
   hr = active_desktop->SetWallpaperOptions(&wallpaper_options, 0);
   if (FAILED(hr)) {
-    SendConsole("SetWallpaper::Options failed!");
+    SendError("SetWallpaper::Options failed!");
     return;
   }
 
