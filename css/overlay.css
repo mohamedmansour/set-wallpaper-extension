@@ -29,7 +29,7 @@
 
 #crx_wlp_preview {
   width: 580px;
-  -webkit-box-shadow: 0px 5px 80px #444;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 1);
   border: 1px solid #BCC1D0;
   border-radius: 20px;
   margin: 0 auto;
@@ -165,13 +165,18 @@
   background-image: url('/img/fit.png');
 }
 
-
 #crx_wlp_tweet {
   font-size: 0.7em;
-  margin: 10px;
+  margin: 10px auto;
+  padding: 5px;
   text-align: center;
+  background-color: rgba(255, 255, 255, 0.5);
+  display: block;
+  width: 175px;
+  border-radius: 5px;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 #crx_wlp_tweet a {
-  color: #fff;
+  color: #333;
 }
