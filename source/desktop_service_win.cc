@@ -112,8 +112,7 @@ void DesktopService::SendError(const char* message) {
   SendConsole(error_message);
 }
 
-void DesktopService::new_stream(NPStream* stream)
-{
+void DesktopService::NewStream(NPStream* stream) {
   std::ostringstream oss;
   oss << "New stream opened: " << stream;
   SendConsole(oss.str().c_str());
@@ -127,8 +126,7 @@ public:
   }
 };
 
-void DesktopService::img_arrived(NPStream* stream, const char* img_path)
-{
+void DesktopService::ImgArrived(NPStream* stream, const char* img_path) {
   // Image has arrived. Finish setting wallpaper.
   std::ostringstream oss;
   oss << "Stream " << stream << " resulted in file downloaded to " << img_path;
@@ -178,8 +176,7 @@ void DesktopService::img_arrived(NPStream* stream, const char* img_path)
   SendConsole("SetWallpaper success!");
 }
 
-void DesktopService::stream_done(NPStream* stream, NPReason reason)
-{
+void DesktopService::StreamDone(NPStream* stream, NPReason reason) {
   std::ostringstream oss;
   oss << "Stream " << stream << " done. Reason: ";
   switch (reason) {
@@ -198,8 +195,7 @@ void DesktopService::stream_done(NPStream* stream, NPReason reason)
   SendConsole(oss.str().c_str());
 }
 
-void DesktopService::url_notify(const char* url, NPReason reason)
-{
+void DesktopService::UrlNotify(const char* url, NPReason reason) {
   std::ostringstream oss;
   oss << "GetURL of " << url << " done. Reason: ";
   switch (reason) {

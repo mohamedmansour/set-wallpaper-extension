@@ -3,6 +3,7 @@ source/Debug
 source/bin
 source/*.suo
 source/*.vcxproj*
+source/*.vcproj*
 build-*
 install-*
 *.zip

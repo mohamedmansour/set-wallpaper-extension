@@ -31,16 +31,16 @@ class DesktopService {
   void SendError(const char* message);
 
   // Called by the implementation of NPP_NewStream.
-  void new_stream(NPStream* stream);
+  void NewStream(NPStream* stream);
 
   // Called by the implementation of NPP_StreamAsFile.
-  void img_arrived(NPStream* stream, const char* fname);
+  void ImgArrived(NPStream* stream, const char* fname);
 
   // Called by the implementation of NPP_DestroyStream.
-  void stream_done(NPStream* stream, NPReason reason);
+  void StreamDone(NPStream* stream, NPReason reason);
 
   // CAlled by the implementation of NPP_URLNotify.
-  void url_notify(const char* url, NPReason reason);
+  void UrlNotify(const char* url, NPReason reason);
 
  private:
   NPP npp_;

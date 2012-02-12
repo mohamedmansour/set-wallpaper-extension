@@ -31,8 +31,7 @@ NPError NPP_New(NPMIMEType mime_type,
     return NPERR_INVALID_INSTANCE_ERROR;
   }
 
-  DesktopService* desktop_service =
-      new(std::nothrow) DesktopService(instance);
+  DesktopService* desktop_service = new(std::nothrow) DesktopService(instance);
   if (desktop_service == NULL) {
     return NPERR_OUT_OF_MEMORY_ERROR;
   }
@@ -85,8 +84,9 @@ NPObject* NPP_GetScriptableInstance(NPP instance) {
 NPError NPP_GetValue(NPP instance, NPPVariable variable, void *value) {
   if (NPPVpluginScriptableNPObject == variable) {
     NPObject* scriptable_object = NPP_GetScriptableInstance(instance);
-    if (scriptable_object == NULL)
+    if (scriptable_object == NULL) {
       return NPERR_INVALID_INSTANCE_ERROR;
+    }
     *reinterpret_cast<NPObject**>(value) = scriptable_object;
     return NPERR_NO_ERROR;
   }
@@ -104,48 +104,40 @@ int16_t NPP_HandleEvent(NPP instance, void* event) {
 
 // Called by the browser when a new stream is started. That is, when
 // NPN_GetURL(Notify) is called.
-NPError NPP_NewStream(NPP        instance, 
+NPError NPP_NewStream(NPP instance,
                       NPMIMEType type,
-                      NPStream*  stream,
-                      NPBool     seekable,
-                      uint16_t*    stype)
-{
+                      NPStream* stream,
+                      NPBool seekable,
+                      uint16_t* stype) {
   // Set stype to NP_ASFILEONLY since we need the image as a file anyway to be
   // able to set the wallpaper. This causes NPP_StreamAsFile() to be called when
   // the download is complete.
   *stype = NP_ASFILEONLY;
   DesktopService* desktop_service = static_cast<DesktopService*>(instance->pdata);
-  desktop_service->new_stream(stream);
+  desktop_service->NewStream(stream);
   return NPERR_NO_ERROR;
 }
 
 // Called by the browser when GetURL request is complete and present as a file
 // in the local filesystem.
-void NPP_StreamAsFile(NPP         instance,
-                      NPStream*   stream,
-                      const char* fname)
-{
+void NPP_StreamAsFile(NPP instance, NPStream* stream, const char* fname) {
   DesktopService* desktop_service = static_cast<DesktopService*>(instance->pdata);
-  desktop_service->img_arrived(stream, fname);
+  desktop_service->ImgArrived(stream, fname);
 }
 
 // Called by the browser when the stream is finished.
-NPError NPP_DestroyStream(NPP       instance, 
-                          NPStream* stream, 
-                          NPReason  reason)
-{
+NPError NPP_DestroyStream(NPP instance, NPStream* stream, NPReason reason) {
   DesktopService* desktop_service = static_cast<DesktopService*>(instance->pdata);
-  desktop_service->stream_done(stream, reason);
+  desktop_service->StreamDone(stream, reason);
   return NPERR_NO_ERROR;
 }
 
 // If NPN_GetURLNotify is called, this function is called to indicate successful
 // or unsuccessful completion of the 'get'.
-void NPP_URLNotify(NPP         instance, 
+void NPP_URLNotify(NPP instance,
                    const char* url,
-                   NPReason    reason, 
-                   void*       notifyData)
-{
+                   NPReason reason,
+                   void* notifyData) {
   DesktopService* desktop_service = static_cast<DesktopService*>(instance->pdata);
-  desktop_service->url_notify(url, reason);
+  desktop_service->UrlNotify(url, reason);
 }
