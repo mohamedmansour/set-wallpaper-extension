@@ -45,29 +45,22 @@ ApprovalOptions.prototype.init = function() {
  * Binds the UI to the data from the backend.
  */
 ApprovalOptions.prototype.bindUI = function() {
-  // Whitelisted
-  var whitelistedList = bkg.settings.whitelisted;
-  var whitelistedElement = $(ApprovalOptions.WHITELISTED_ID + '_list');
-  for (var i = 0; i < whitelistedList.length; i++) {
-    var item = whitelistedList[i];
-    whitelistedElement.add(new Option(item.substring(item.indexOf(':'))));
-  }
-  whitelistedElement.addEventListener('change', function(e) {
-    var value = this.options[this.selectedIndex].value;
-    bkg.settings.whitelisted = value;
-  });
+  this.bindList('whitelisted');
+  this.bindList('blacklisted');
+};
 
-  // Blacklisted
-  var blacklistedList = bkg.settings.blacklisted;
-  var blacklistedElement = $(ApprovalOptions.BLACKLISTED_ID + '_list');
-  for (var i = 0; i < blacklistedList.length; i++) {
-    var item = blacklistedList[i];
-    blacklistedElement.add(new Option(item.substring(item.indexOf(':'))));
+/**
+ * Binds the list to the options UI based on the type for it.
+ *
+ * @param {string} type The list type to bind.
+ */
+ApprovalOptions.prototype.bindList = function(type) {
+  var list = bkg.settings[type];
+  var listElement = $(ApprovalOptions[type.toUpperCase() + '_ID'] + '_list');
+  for (var i = 0; i < list.length; i++) {
+    var item = list[i];
+    listElement.add(new Option(item.substring(item.indexOf(':') + 1)));
   }
-  blacklistedElement.addEventListener('change', function(e) {
-    var value = this.options[this.selectedIndex].value;
-    bkg.settings.blacklisted = value;
-  });
 };
 
 /**
