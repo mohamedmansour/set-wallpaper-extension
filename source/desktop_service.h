@@ -1,4 +1,4 @@
-// Copyright 2010 Mohamed Mansour. All rights reserved.
+// Copyright 2012 Mohamed Mansour. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
@@ -57,7 +57,7 @@ class DesktopService {
   NPObject* scriptable_object_;
   ULONG_PTR gdiplus_token_;
   bool debug_;
-  int m_style;
+  int style_;
   bool supports_jpeg_wallpaper_;
 };
 

@@ -1,4 +1,4 @@
-// Copyright 2010 Mohamed Mansour. All rights reserved.
+// Copyright 2012 Mohamed Mansour. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
@@ -24,6 +24,7 @@ DesktopService::DesktopService(NPP npp)
       scriptable_object_(NULL),
       gdiplus_token_(NULL),
       debug_(false),
+      style_(0),
       supports_jpeg_wallpaper_(IsJPEGSupported()) {
   ScriptingBridge::InitializeIdentifiers();
   GdiplusStartupInput gdiplus_startup_input;
@@ -71,16 +72,15 @@ bool DesktopService::GetWallpaperStyle(NPVariant* result) {
 bool DesktopService::SetWallpaper(NPVariant* result,
                                   NPString image_url,
                                   int style) {
-  SendConsole("SetWallpaper::BEGIN starting");
-
   std::ostringstream oss;
   oss << "SetWallpaper::URL " << image_url.UTF8Characters;
   SendConsole(oss.str().c_str());
 
-  m_style = style;
+  // Save the style type for later one after we recieve the image.
+  style_ = style;
 
   // Ask browser to retrieve this file for us. The actual wallpaper-setting process
-  // is completed by img_arrived().
+  // is completed by ImgArrived().
   NPError err = NPN_GetURLNotify(npp_, image_url.UTF8Characters, 0, 0);
 
   return err == NPERR_NO_ERROR;
@@ -121,7 +121,7 @@ void DesktopService::SendConsole(const char* message) {
 
 void DesktopService::SendError(const char* message) {
   char error_message[35];
-  sprintf(error_message, "%s %04d", message, GetLastError());
+  sprintf(error_message, "ERROR: %s %04d", message, GetLastError());
   NPN_SetException(scriptable_object_, error_message);
   SendConsole(error_message);
 }
@@ -148,28 +148,62 @@ void DesktopService::ImgArrived(NPStream* stream, const char* img_path) {
 
   // Copy from char* to TCHAR* for SetWallpaper's benefit.
   size_t path_len = std::strlen(img_path);
-  TCHAR* img_path_tchar = new TCHAR[path_len + 1];
-  img_path_tchar[path_len] = 0;
-  std::copy(img_path, img_path + path_len, img_path_tchar);
+  WCHAR* temp_file_path = new WCHAR[path_len + 1];
+  temp_file_path[path_len] = 0;
+  std::copy(img_path, img_path + path_len, temp_file_path);
 
-  Image* image = new Image(img_path_tchar);
-  if (!image) {
-    SendError("Something went wrong while constructing the image.");
-    return;
-  }
-
-  // Encode it to BMP.
+  // Construct the permanent location path since we don't want to store it
+  // in temporary directory. Some users remove that daily and when they restart
+  // it will remove the desktop.
   WCHAR current_path[MAX_PATH];
   GetCurrentDirectoryW(MAX_PATH, current_path);
   WCHAR file_name[MAX_PATH];
-  wsprintf(file_name, L"%s\\ChromeSetWallpaperExtension.bmp", current_path);
-  CLSID clsid;
-  GetEncoderClsid(L"image/bmp", &clsid);
-  if (image->Save(file_name, &clsid) != Ok) {
-    delete image;
-    return;
+  wsprintf(file_name, L"%s\\SetWallpaperExtensionImage", current_path);
+
+  // Get the char representation so we can send it to debug.
+  size_t file_name_len = wcslen(file_name) + 1;
+  char file_name_chars[MAX_PATH];
+  size_t converted_chars = 0;
+  wcstombs_s(&converted_chars, file_name_chars, file_name_len, file_name, _TRUNCATE);
+  oss.str("");
+
+  // Version 5+ of Windows has smarter image extension support. We need to
+  // catch the ones that support Windows XP/2000 since they don't like JPEG,
+  // they only like BMP.
+  if (IsJPEGSupported()) {
+
+    // Just copy the file to the permanent location.
+    if (CopyFileW(temp_file_path, file_name, false)) {
+      oss << "Copied wallpaper to " << file_name_chars;
+      SendConsole(oss.str().c_str());
+    }
+    else {
+      oss << "Something went wrong while copying image: " << file_name_chars;
+      SendError(oss.str().c_str());
+      return;
+    }
   }
-  delete image;
+  else {
+    // We need to convert it to a BMP and store it in the permanent location.
+    Image* image = new Image(temp_file_path);
+    if (!image) {
+      SendError("Something went wrong while constructing the image.");
+      return;
+    }
+
+    // Encode it to BMP.
+    CLSID clsid;
+    GetEncoderClsid(L"image/bmp", &clsid);
+    if (image->Save(file_name, &clsid) != Ok) {
+      SendError("Something went wrong while saving the image as a BMP.");
+      delete image;
+      return;
+    }
+    delete image;
+
+    oss << "Saved wallpaper to " << file_name_chars;
+    SendConsole(oss.str().c_str());
+  }
 
   // Set the active wallpaper on the desktop.
   LPACTIVEDESKTOP active_desktop;
@@ -193,7 +227,7 @@ void DesktopService::ImgArrived(NPStream* stream, const char* img_path) {
   }
 
   wallpaper_options.dwSize = sizeof(WALLPAPEROPT);
-  wallpaper_options.dwStyle = m_style;
+  wallpaper_options.dwStyle = style_;
   hr = active_desktop->SetWallpaperOptions(&wallpaper_options, 0);
   if (FAILED(hr)) {
     SendError("SetWallpaper::Options failed!");
