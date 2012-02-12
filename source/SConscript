@@ -15,14 +15,14 @@ if str(Platform()) == 'win32':
     '_X86_',
     'setbackground_plugin_EXPORTS',
     '_CRT_SECURE_NO_WARNINGS',
-    '_CRT_SECURE_NO_DEPRECATE'
+    '_CRT_SECURE_NO_DEPRECATE',
+    '_SCL_SECURE_NO_WARNINGS',
     '_WINDLL',
     '_UNICODE',
-    'UNICODE',
-    'WIN32_LEAN_AND_MEAN'
+    'UNICODE'
     ])
   source_env.Append(CPPFLAGS = ['/EHsc', '/W3'])
-  source_env.Append(LIBS = ['urlmon.lib', 'userenv.lib', 'user32.lib', 'ole32.lib', 'advapi32.lib'])
+  source_env.Append(LIBS = ['Gdiplus.lib', 'urlmon.lib', 'userenv.lib', 'user32.lib', 'ole32.lib', 'advapi32.lib'])
   if source_env['DEBUG']:
     source_env.Append(CCFLAGS = ['/Od', '/RTC1', '/Z7', '/MTd'])
     source_env.Append(LINKFLAGS = ['/DEBUG'])

@@ -5,6 +5,7 @@
 #include "desktop_service.h"
 
 #include <windows.h>
+#include <gdiplus.h>
 #include <wininet.h>
 #include <shlobj.h>
 #include <urlmon.h>
@@ -12,20 +13,26 @@
 #include <sstream>
 
 #include "scripting_bridge.h"
-#include "string_utils.h"
 
 using desktop_service::ScriptingBridge;
+using namespace Gdiplus;
 
 namespace desktop_service {
 
 DesktopService::DesktopService(NPP npp)
     : npp_(npp),
       scriptable_object_(NULL),
-      debug_(false) {
+      gdiplus_token_(NULL),
+      debug_(false),
+      supports_jpeg_wallpaper_(IsJPEGSupported()) {
   ScriptingBridge::InitializeIdentifiers();
+  GdiplusStartupInput gdiplus_startup_input;
+  GdiplusStartup(&gdiplus_token_, &gdiplus_startup_input, NULL);
 }
 
 DesktopService::~DesktopService() {
+  if (gdiplus_token_)
+    GdiplusShutdown(gdiplus_token_);
   if (scriptable_object_)
     NPN_ReleaseObject(scriptable_object_);
 }
@@ -212,6 +219,52 @@ void DesktopService::UrlNotify(const char* url, NPReason reason) {
     break;
   }
   SendConsole(oss.str().c_str());
+}
+
+int DesktopService::GetEncoderClsid(const TCHAR* format, CLSID* pClsid) {
+  UINT  num = 0;  // Number of image encoders.
+  UINT  size = 0; // Size of the image encoder array in bytes.
+
+  ImageCodecInfo* image_codec_info = NULL;
+
+  GetImageEncodersSize(&num, &size);
+  if (size == 0)
+    return -1;  // Failure.
+
+  image_codec_info = (ImageCodecInfo*)(malloc(size));
+  if (image_codec_info == NULL)
+    return -1;  // Failure.
+
+  GetImageEncoders(num, size, image_codec_info);
+
+  for (UINT j = 0; j < num; ++j) {
+    if (wcscmp(image_codec_info[j].MimeType, format) == 0 ) {
+      *pClsid = image_codec_info[j].Clsid;
+      free(image_codec_info);
+      return j;  // Success.
+    }
+  }
+
+  free(image_codec_info);
+  return -1;  // Failure.
+}
+
+bool DesktopService::IsJPEGSupported() {
+  OSVERSIONINFOEX osvi;
+  ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+  osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+  int bOsVersionInfoEx;
+
+  if (!(bOsVersionInfoEx = GetVersionEx((OSVERSIONINFO*) &osvi))) {
+    SendConsole("Cannot retrieve Windows Version.");
+    return false;
+  }
+  if (VER_PLATFORM_WIN32_NT == osvi.dwPlatformId &&  osvi.dwMajorVersion > 5) {
+    SendConsole("Windows Version supports JPEG as wallpaper.");
+    return true;
+  }
+  SendConsole("Windows Version does not support JPEG as wallpaper.");
+  return false;
 }
 
 }  // namespace desktop_service
