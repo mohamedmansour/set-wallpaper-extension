@@ -55,6 +55,9 @@ ApprovalOptions.prototype.bindUI = function() {
  * @param {string} type The list type to bind.
  */
 ApprovalOptions.prototype.bindList = function(type) {
+  if (!type.match('whitelisted|blacklisted')) {
+    return;
+  }
   var list = bkg.settings[type];
   var listElement = $(ApprovalOptions[type.toUpperCase() + '_ID'] + '_list');
   for (var i = 0; i < list.length; i++) {
