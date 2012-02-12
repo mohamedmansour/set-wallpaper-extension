@@ -99,30 +99,33 @@ ApprovalService.prototype.verify = function(extensionInfo, callback) {
   chrome.windows.create({
     url: 'approval.html#' + extensionID, type: 'popup', width: 600, height: 275
   }, function(win) {
-    // Make sure the dialog has opened, otherwise send a failure response since something
-    // clearly went wrong, maybe the IPC connection, they need to resend.
-    var approvalController = this.findApprovalController(extensionID);
-    if (!approvalController) {
-      console.error('Cannot find approval controller for extension ' + extensionID);
-      callback(false);
-      return;
-    }
+    // Lazy load it, wait 100ms. Sometimes this callback doesn't work.
+    setTimeout(function() {
+      // Make sure the dialog has opened, otherwise send a failure response since something
+      // clearly went wrong, maybe the IPC connection, they need to resend.
+      var approvalController = this.findApprovalController(extensionID);
+      if (!approvalController) {
+        console.error('Cannot find approval controller for extension ' + extensionID);
+        callback(false);
+        return;
+      }
 
-    // Send extension info payload to that view and when an approval has been processed
-    // send a response back to the initiator.
-    approvalController.setResponseListener(extensionInfo, function(state) {
-      if (state === 'block') {
-        this.persistApproval('blacklisted', extensionInfo);
-        callback(false);
-      }
-      else if (state === 'yes') {
-        this.persistApproval('whitelisted', extensionInfo);
-        callback(true);
-      }
-      else {
-        callback(false);
-      }
-    }.bind(this));
+      // Send extension info payload to that view and when an approval has been processed
+      // send a response back to the initiator.
+      approvalController.setResponseListener(extensionInfo, function(state) {
+        if (state === 'block') {
+          this.persistApproval('blacklisted', extensionInfo);
+          callback(false);
+        }
+        else if (state === 'yes') {
+          this.persistApproval('whitelisted', extensionInfo);
+          callback(true);
+        }
+        else {
+          callback(false);
+        }
+      }.bind(this));
+    }.bind(this), 100);
   }.bind(this));
 };
 
