@@ -12,9 +12,9 @@ ApprovalController = function() {
  * Initializes the button events.
  */
 ApprovalController.prototype.init = function() {
-  $('yes').addEventListener('click', this.onYes.bind(this), false);
-  $('no').addEventListener('click', this.onNo.bind(this), false);
-  $('block').addEventListener('click', this.onBlock.bind(this), false);
+  $('yes').addEventListener('click', this.onResponseClickListener.bind(this), false);
+  $('no').addEventListener('click', this.onResponseClickListener.bind(this), false);
+  $('block').addEventListener('click', this.onResponseClickListener.bind(this), false);
 };
 
 /**
@@ -28,25 +28,9 @@ ApprovalController.prototype.setResponseListener = function(extensionInfo, callb
 };
 
 /**
- * Fired when pressed YES.
+ * Fired when any button on the page was clicked.
  */
-ApprovalController.prototype.onYes = function() {
-  this.callback('YES');
-  window.close();
-};
-
-/**
- * Fired when pressed NO.
- */
-ApprovalController.prototype.onNo = function() {
-  this.callback('NO');
-  window.close();
-};
-
-/**
- * Fired when pressed BLOCK.
- */
-ApprovalController.prototype.onBlock = function() {
-  this.callback('BLOCK');
+ApprovalController.prototype.onResponseClickListener = function(e) {
+  this.callback(e.target.id);
   window.close();
 };

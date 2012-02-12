@@ -81,13 +81,13 @@ ApprovalService.prototype.verify = function(extensionID, callback) {
         chrome.extension.getViews({type: 'tab'}).some(function(obj) {
           if (obj.location.pathname === '/approval.html') {
             obj.controller.setResponseListener(extensionInfo, function(state) {
-              if (state === 'BLOCK') {
+              if (state === 'block') {
                 var blacklist = settings.blacklisted;
                 blacklist.push(extensionID + ':' + extensionInfo.name.replace(/,/g, ' '));
                 settings.blacklisted = blacklist;
                 callback(false);
               }
-              else if (state === 'YES') {
+              else if (state === 'yes') {
                 var whitelist = settings.whitelisted;
                 whitelist.push(extensionID + ':' + extensionInfo.name.replace(/,/g, ' '));
                 settings.whitelisted = whitelist;
