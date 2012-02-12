@@ -4,6 +4,7 @@ source/bin
 source/*.suo
 source/*.vcxproj*
 source/*.vcproj*
+source/*.aps
 build-*
 install-*
 *.zip

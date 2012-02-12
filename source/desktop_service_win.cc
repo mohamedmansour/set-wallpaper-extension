@@ -5,6 +5,7 @@
 #include "desktop_service.h"
 
 #include <windows.h>
+#include <gdiplus.h>
 #include <wininet.h>
 #include <shlobj.h>
 #include <urlmon.h>
@@ -12,20 +13,26 @@
 #include <sstream>
 
 #include "scripting_bridge.h"
-#include "string_utils.h"
 
 using desktop_service::ScriptingBridge;
+using namespace Gdiplus;
 
 namespace desktop_service {
 
 DesktopService::DesktopService(NPP npp)
     : npp_(npp),
       scriptable_object_(NULL),
-      debug_(false) {
+      gdiplus_token_(NULL),
+      debug_(false),
+      supports_jpeg_wallpaper_(IsJPEGSupported()) {
   ScriptingBridge::InitializeIdentifiers();
+  GdiplusStartupInput gdiplus_startup_input;
+  GdiplusStartup(&gdiplus_token_, &gdiplus_startup_input, NULL);
 }
 
 DesktopService::~DesktopService() {
+  if (gdiplus_token_)
+    GdiplusShutdown(gdiplus_token_);
   if (scriptable_object_)
     NPN_ReleaseObject(scriptable_object_);
 }
@@ -48,7 +55,11 @@ bool DesktopService::GetSystemColor(NPVariant* result) {
   result->type = NPVariantType_String;
   result->value.stringValue.UTF8Characters = hex_color;
   result->value.stringValue.UTF8Length = 6;
-  SendConsole(std::string("GetSystemColor::DONE ").append(hex_color).c_str());
+  
+  std::ostringstream oss;
+  oss << "GetSystemColor::DONE  " << hex_color;
+  SendConsole(oss.str().c_str());
+
   return true;
 }
 
@@ -61,7 +72,10 @@ bool DesktopService::SetWallpaper(NPVariant* result,
                                   NPString image_url,
                                   int style) {
   SendConsole("SetWallpaper::BEGIN starting");
-  SendConsole(std::string("SetWallpaper::URL ").append(image_url.UTF8Characters).c_str());
+
+  std::ostringstream oss;
+  oss << "SetWallpaper::URL " << image_url.UTF8Characters;
+  SendConsole(oss.str().c_str());
 
   m_style = style;
 
@@ -132,6 +146,31 @@ void DesktopService::ImgArrived(NPStream* stream, const char* img_path) {
   oss << "Stream " << stream << " resulted in file downloaded to " << img_path;
   SendConsole(oss.str().c_str());
 
+  // Copy from char* to TCHAR* for SetWallpaper's benefit.
+  size_t path_len = std::strlen(img_path);
+  TCHAR* img_path_tchar = new TCHAR[path_len + 1];
+  img_path_tchar[path_len] = 0;
+  std::copy(img_path, img_path + path_len, img_path_tchar);
+
+  Image* image = new Image(img_path_tchar);
+  if (!image) {
+    SendError("Something went wrong while constructing the image.");
+    return;
+  }
+
+  // Encode it to BMP.
+  WCHAR current_path[MAX_PATH];
+  GetCurrentDirectoryW(MAX_PATH, current_path);
+  WCHAR file_name[MAX_PATH];
+  wsprintf(file_name, L"%s\\ChromeSetWallpaperExtension.bmp", current_path);
+  CLSID clsid;
+  GetEncoderClsid(L"image/bmp", &clsid);
+  if (image->Save(file_name, &clsid) != Ok) {
+    delete image;
+    return;
+  }
+  delete image;
+
   // Set the active wallpaper on the desktop.
   LPACTIVEDESKTOP active_desktop;
   WALLPAPEROPT wallpaper_options;
@@ -140,22 +179,16 @@ void DesktopService::ImgArrived(NPStream* stream, const char* img_path) {
   hr = CoCreateInstance(CLSID_ActiveDesktop, NULL, CLSCTX_INPROC_SERVER,
                         IID_IActiveDesktop, (void**)&active_desktop);
   if (FAILED(hr)) {
-    SendConsole("SetWallpaper::Creation failed!");
+    SendError("SetWallpaper::Creation failed!");
     return;
   }
 
   // Perform COM cleanup when this object goes out of scope.
   COMCleanup com_cleanup;
 
-  // Copy from char* to TCHAR* for SetWallpaper's benefit.
-  size_t path_len = std::strlen(img_path);
-  TCHAR* img_path_tchar = new TCHAR[path_len + 1];
-  img_path_tchar[path_len] = 0;
-  std::copy(img_path, img_path + path_len, img_path_tchar);
-
-  hr = active_desktop->SetWallpaper(img_path_tchar, 0);
+  hr = active_desktop->SetWallpaper(file_name, 0);
   if (FAILED(hr)) {
-    SendConsole("SetWallpaper::Image failed!");
+    SendError("SetWallpaper::Image failed!");
     return;
   }
 
@@ -163,7 +196,7 @@ void DesktopService::ImgArrived(NPStream* stream, const char* img_path) {
   wallpaper_options.dwStyle = m_style;
   hr = active_desktop->SetWallpaperOptions(&wallpaper_options, 0);
   if (FAILED(hr)) {
-    SendConsole("SetWallpaper::Options failed!");
+    SendError("SetWallpaper::Options failed!");
     return;
   }
 
@@ -212,6 +245,52 @@ void DesktopService::UrlNotify(const char* url, NPReason reason) {
     break;
   }
   SendConsole(oss.str().c_str());
+}
+
+int DesktopService::GetEncoderClsid(const TCHAR* format, CLSID* pClsid) {
+  UINT  num = 0;  // Number of image encoders.
+  UINT  size = 0; // Size of the image encoder array in bytes.
+
+  ImageCodecInfo* image_codec_info = NULL;
+
+  GetImageEncodersSize(&num, &size);
+  if (size == 0)
+    return -1;  // Failure.
+
+  image_codec_info = (ImageCodecInfo*)(malloc(size));
+  if (image_codec_info == NULL)
+    return -1;  // Failure.
+
+  GetImageEncoders(num, size, image_codec_info);
+
+  for (UINT j = 0; j < num; ++j) {
+    if (wcscmp(image_codec_info[j].MimeType, format) == 0 ) {
+      *pClsid = image_codec_info[j].Clsid;
+      free(image_codec_info);
+      return j;  // Success.
+    }
+  }
+
+  free(image_codec_info);
+  return -1;  // Failure.
+}
+
+bool DesktopService::IsJPEGSupported() {
+  OSVERSIONINFOEX osvi;
+  ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+  osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+  int bOsVersionInfoEx;
+
+  if (!(bOsVersionInfoEx = GetVersionEx((OSVERSIONINFO*) &osvi))) {
+    SendConsole("Cannot retrieve Windows Version.");
+    return false;
+  }
+  if (VER_PLATFORM_WIN32_NT == osvi.dwPlatformId &&  osvi.dwMajorVersion > 5) {
+    SendConsole("Windows Version supports JPEG as wallpaper.");
+    return true;
+  }
+  SendConsole("Windows Version does not support JPEG as wallpaper.");
+  return false;
 }
 
 }  // namespace desktop_service
