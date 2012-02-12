@@ -79,7 +79,7 @@ ApprovalService.prototype.verify = function(extensionID, callback) {
         height: 275
       }, function(win) {
         chrome.extension.getViews({type: 'tab'}).some(function(obj) {
-          if (obj.location.pathname === '/approval.html') {
+          if (obj.location.pathname === '/approval.html' && obj.location.hash === '#' + extensionID) {
             obj.controller.setResponseListener(extensionInfo, function(state) {
               if (state === 'block') {
                 var blacklist = settings.blacklisted;
