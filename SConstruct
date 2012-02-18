@@ -47,6 +47,26 @@ extension_builder = Builder(action=Action(package_extension_func,
                             source_factory=Dir,
                             emitter=extension_emitter)
 
+# Our zip builder is simpler than SCon's built-in one in that we assume there
+# is a single source and it's a directory. However, this builder does something
+# the built-in builder doesn't: store files in the zip with different name/path
+# than what's found on disk. Files within the zip are rooted in a directory
+# with the same name as the last component of the path of source[0].
+def zip_func(target, source, env):
+  import zipfile
+
+  zip_root = os.path.split(str(source[0]))[0]
+
+  zf = zipfile.ZipFile(str(target[0]),'w', zipfile.ZIP_DEFLATED)
+  for root, dirs, files in os.walk(str(source[0])):
+    for f in files:
+      full_path = os.path.join(root, f)
+      zf.write(os.path.join(root, f), os.path.relpath(full_path, zip_root))
+
+zipper = Builder(action = Action(zip_func, "Creating zipfile $TARGET from directory $SOURCE"),
+                 source_factory = Dir,
+                 suffix = '.zip')
+
 ################################################################################
 # Main script
 
@@ -68,6 +88,7 @@ vars.Add(PathVariable('PRIVATE_KEY', 'Location of the private signing key (.pem 
 env = Environment(variables=vars)
 env.Help(vars.GenerateHelpText(env, sort=cmp))
 env.Append(BUILDERS = {'ExtensionPackager':extension_builder})
+env.Append(BUILDERS = {'Zipper' : zipper})
 
 build_dir_name = 'build-' + ('debug' if env['DEBUG'] else 'release') + '-' + env['TARGET_ARCH']
 install_dir_name = 'install-' + ('debug' if env['DEBUG'] else 'release') + '-' + env['TARGET_ARCH']
@@ -88,9 +109,14 @@ install_actions = [env.Install(install_dir_name, shared_lib[0]),
 env.Alias('unpacked', install_actions)
 env.Default(install_actions)
 
+# Target to create a packed and signed extension.
 pack = env.ExtensionPackager(install_dir_name)
 env.Alias('packed', pack)
 
-# Define a named target for exporting README.md from markdown to html.
+# Target to create a zip file of the unpacked extension.
+zipped = env.Zipper('set-wallpaper-extension.zip', install_dir_name)
+env.Alias('zip', zipped)
+
+# Target processing README.md into html.
 readme = env.Command('README.html', 'README.md', markdown_action)
 env.Alias('readme', readme)
