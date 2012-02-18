@@ -27,8 +27,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,0,0
- PRODUCTVERSION 2,0,0,0
+ FILEVERSION 3,0,0,0
+ PRODUCTVERSION 3,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -46,13 +46,13 @@ BEGIN
             VALUE "CompanyName", "Mohamed Mansour"
             VALUE "FileDescription", "NPAPI Plugin that sets an image as a wallpaper, copyright 2011 <a href=""http://mohamedmansour.com"">Mohamed Mansour</a>"
             VALUE "FileOpenName", "Set Wallpaper Plugin"
-            VALUE "FileVersion", "2, 0, 0, 0"
+            VALUE "FileVersion", "3, 0, 0, 0"
             VALUE "InternalName", "SetWallpaperPlugin"
             VALUE "LegalCopyright", "Copyright 2012 Mohamed Mansour."
             VALUE "MIMEType", "application/x-vnd-set-wallpaper"
             VALUE "OriginalFilename", "setwallpaper-plugin.dll"
             VALUE "ProductName", "Set Wallpaper Plugin"
-            VALUE "ProductVersion", "2, 0, 0, 0"
+            VALUE "ProductVersion", "3, 0, 0, 0"
         END
     END
     BLOCK "VarFileInfo"
