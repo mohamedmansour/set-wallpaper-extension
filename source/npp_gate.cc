@@ -6,10 +6,11 @@
 #include <new>
 
 #include "npapi.h"
-
 #include "desktop_service.h"
 
-using desktop_service::DesktopService;
+using set_wallpaper_extension::DesktopService;
+
+extern "C" {
 
 // This file implements functions that the plugin is expected to implement so
 // that the browser can all them.
@@ -26,7 +27,6 @@ NPError NPP_New(NPMIMEType mime_type,
                 char* argn[],
                 char* argv[],
                 NPSavedData* saved) {    
-  extern NPNetscapeFuncs* GetNetscapeFuncs();
   if (instance == NULL) {
     return NPERR_INVALID_INSTANCE_ERROR;
   }
@@ -87,7 +87,7 @@ NPError NPP_GetValue(NPP instance, NPPVariable variable, void *value) {
     if (scriptable_object == NULL) {
       return NPERR_INVALID_INSTANCE_ERROR;
     }
-    *reinterpret_cast<NPObject**>(value) = scriptable_object;
+    *static_cast<NPObject**>(value) = scriptable_object;
     return NPERR_NO_ERROR;
   }
   return NPERR_INVALID_PARAM;
@@ -141,3 +141,5 @@ void NPP_URLNotify(NPP instance,
   DesktopService* desktop_service = static_cast<DesktopService*>(instance->pdata);
   desktop_service->UrlNotify(url, reason);
 }
+
+} // extern "C"

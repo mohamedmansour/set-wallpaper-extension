@@ -5,9 +5,10 @@
 #include "npapi.h"
 #include "npfunctions.h"
 
+extern "C" {
+
 extern NPNetscapeFuncs* npnfuncs;
 
-extern "C" {
 // When the browser calls NP_Initialize the plugin needs to return a list
 // of functions that have been implemented so that the browser can
 // communicate with the plugin.  This function populates that list,
@@ -16,14 +17,14 @@ NPError OSCALL NP_GetEntryPoints(NPPluginFuncs *plugin_functions) {
   memset(plugin_functions, 0, sizeof(*plugin_functions));
   plugin_functions->version       = NPVERS_HAS_PLUGIN_THREAD_ASYNC_CALL;
   plugin_functions->size          = sizeof(*plugin_functions);
-  plugin_functions->newp          = NPP_New;
-  plugin_functions->destroy       = NPP_Destroy;
-  plugin_functions->event         = NPP_HandleEvent;
-  plugin_functions->getvalue      = NPP_GetValue;
-  plugin_functions->newstream     = NPP_NewStream;
-  plugin_functions->asfile        = NPP_StreamAsFile;
-  plugin_functions->destroystream = NPP_DestroyStream;
-  plugin_functions->urlnotify     = NPP_URLNotify;
+  plugin_functions->newp          = &NPP_New;
+  plugin_functions->destroy       = &NPP_Destroy;
+  plugin_functions->event         = &NPP_HandleEvent;
+  plugin_functions->getvalue      = &NPP_GetValue;
+  plugin_functions->newstream     = &NPP_NewStream;
+  plugin_functions->asfile        = &NPP_StreamAsFile;
+  plugin_functions->destroystream = &NPP_DestroyStream;
+  plugin_functions->urlnotify     = &NPP_URLNotify;
   return NPERR_NO_ERROR;
 }
 

@@ -2,14 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
-// NPAPI extensions for NPN_* functionality.
 #include "npfunctions.h"
 
-// Main Browser function that the entire life of plugin will use.
+extern "C" {
+
+// This structure contains pointers to NPN_ functions implemented by the browser.
+// It's filled in during initialization by NP_GetEntryPoints.
 NPNetscapeFuncs* npnfuncs = NULL;
-NPNetscapeFuncs* GetNetscapeFuncs() {
-  return npnfuncs;
-}
+
+// NPN_ functions are functions implemented by the browser for the plugin to
+// call. The NPN_ functions below are just convenience wrappers for calling the
+// real functions whose pointers are stored in npnfuncs.
 
 // Requests creation of a new stream with the contents of the specified URL;
 // gets notification of the result.
@@ -321,3 +324,5 @@ int32_t NPN_IntFromIdentifier(NPIdentifier identifier) {
 void NPN_ReleaseVariantValue(NPVariant *variant) {
   npnfuncs->releasevariantvalue(variant);
 }
+
+} // extern "C"

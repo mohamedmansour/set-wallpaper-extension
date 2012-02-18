@@ -14,10 +14,9 @@
 
 #include "scripting_bridge.h"
 
-using desktop_service::ScriptingBridge;
 using namespace Gdiplus;
 
-namespace desktop_service {
+namespace set_wallpaper_extension {
 
 DesktopService::DesktopService(NPP npp)
     : npp_(npp),
@@ -26,7 +25,6 @@ DesktopService::DesktopService(NPP npp)
       debug_(false),
       style_(0),
       supports_jpeg_wallpaper_(IsJPEGSupported()) {
-  ScriptingBridge::InitializeIdentifiers();
   GdiplusStartupInput gdiplus_startup_input;
   GdiplusStartup(&gdiplus_token_, &gdiplus_startup_input, NULL);
 }
@@ -40,7 +38,7 @@ DesktopService::~DesktopService() {
 
 NPObject* DesktopService::GetScriptableObject() {
   if (scriptable_object_ == NULL)
-    scriptable_object_ = NPN_CreateObject(npp_, &ScriptingBridge::np_class);
+    scriptable_object_ = NPN_CreateObject(npp_, ScriptingBridge::GetNPClass());
 
   if (scriptable_object_)
     NPN_RetainObject(scriptable_object_);
@@ -327,4 +325,4 @@ bool DesktopService::IsJPEGSupported() {
   return false;
 }
 
-}  // namespace desktop_service
+}  // namespace set_wallpaper_extension

@@ -4,11 +4,10 @@
 
 #ifndef DESKTOP_SERVICE_H_
 #define DESKTOP_SERVICE_H_
-#pragma once
 
 #include "npfunctions.h"
 
-namespace desktop_service {
+namespace set_wallpaper_extension {
 
 class DesktopService {
  public:
