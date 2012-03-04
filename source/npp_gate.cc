@@ -6,7 +6,7 @@
 #include <new>
 
 #include "npapi.h"
-#include "desktop_service.h"
+#include "win_desktop_service.h"
 
 using set_wallpaper_extension::DesktopService;
 
@@ -31,7 +31,7 @@ NPError NPP_New(NPMIMEType mime_type,
     return NPERR_INVALID_INSTANCE_ERROR;
   }
 
-  DesktopService* desktop_service = new(std::nothrow) DesktopService(instance);
+  DesktopService* desktop_service = new(std::nothrow)set_wallpaper_extension::WindowsDesktopService(instance);
   if (desktop_service == NULL) {
     return NPERR_OUT_OF_MEMORY_ERROR;
   }
@@ -113,8 +113,6 @@ NPError NPP_NewStream(NPP instance,
   // able to set the wallpaper. This causes NPP_StreamAsFile() to be called when
   // the download is complete.
   *stype = NP_ASFILEONLY;
-  DesktopService* desktop_service = static_cast<DesktopService*>(instance->pdata);
-  desktop_service->NewStream(stream);
   return NPERR_NO_ERROR;
 }
 
@@ -122,13 +120,11 @@ NPError NPP_NewStream(NPP instance,
 // in the local filesystem.
 void NPP_StreamAsFile(NPP instance, NPStream* stream, const char* fname) {
   DesktopService* desktop_service = static_cast<DesktopService*>(instance->pdata);
-  desktop_service->ImgArrived(stream, fname);
+  desktop_service->ImageDownloadComplete(stream, fname);
 }
 
 // Called by the browser when the stream is finished.
 NPError NPP_DestroyStream(NPP instance, NPStream* stream, NPReason reason) {
-  DesktopService* desktop_service = static_cast<DesktopService*>(instance->pdata);
-  desktop_service->StreamDone(stream, reason);
   return NPERR_NO_ERROR;
 }
 
@@ -139,7 +135,7 @@ void NPP_URLNotify(NPP instance,
                    NPReason reason,
                    void* notifyData) {
   DesktopService* desktop_service = static_cast<DesktopService*>(instance->pdata);
-  desktop_service->UrlNotify(url, reason);
+  desktop_service->DownloadCompletionStatus(url, reason);
 }
 
 } // extern "C"

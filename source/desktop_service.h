@@ -5,61 +5,59 @@
 #ifndef DESKTOP_SERVICE_H_
 #define DESKTOP_SERVICE_H_
 
-#include "npfunctions.h"
+#include "npapi.h"
+#include "npruntime.h"
 
 namespace set_wallpaper_extension {
 
 class DesktopService {
  public:
   DesktopService(NPP npp);
-  ~DesktopService();
 
+  virtual ~DesktopService();
+
+  // Return the primary color of the desktop as a 6-character hex color code.
+  virtual bool GetSystemColor(NPVariant* result) = 0;
+
+  // Return the current desktop wallpaper style.
+  virtual bool GetWallpaperStyle(NPVariant* result) = 0;
+
+  // Start the process of downloading 'url' to be used as a desktop background.
+  virtual bool SetWallpaper(NPVariant* result, const NPString& url, int style) = 0;
+
+  // After requesting an image with StartImageDownload(), this function will
+  // be called when the image is successfully downloaded and stored on disk
+  // under the name 'filename'. Implement this function to actually set the
+  // desktop background.
+  virtual void ImageDownloadComplete(NPStream* stream, const char* filename) = 0;
+
+  // This function is called to indicate the success or failure of downloading
+  // an image.
+  virtual void DownloadCompletionStatus(const char* url, NPReason reason) = 0;
+
+  // Although the scripting bridge is the connection between javascript world
+  // and a DesktopService instance, it's convenient for a DesktopService
+  // instance to own the scripting bridge because the DesktopService gets
+  // created first and both should be destroyed at the same time.
   NPObject* GetScriptableObject();
 
-  bool GetSystemColor(NPVariant* result);
-  bool GetWallpaperStyle(NPVariant* result);
-  bool SetWallpaper(NPVariant* result, NPString path, int style);
+  // Write a message to the console for the background.html page within Chrome.
+  // Messages are written only if is_debug_ is true.
+  void WriteToConsole(const char* message);
 
-  bool debug() const { return debug_; }
-  void set_debug(bool debug) { debug_ = debug; }
+  bool is_debug() const { return is_debug_; }
+  void set_is_debug(bool val) { is_debug_ = val; }
 
-  // Send debug messages to the background.html page within chrome.
-  void SendConsole(const char* message);
-
-  // Send an error message to the console and to the chrome extension.
-  void SendError(const char* message);
-
-  // Called by the implementation of NPP_NewStream.
-  void NewStream(NPStream* stream);
-
-  // Called by the implementation of NPP_StreamAsFile.
-  void ImgArrived(NPStream* stream, const char* fname);
-
-  // Called by the implementation of NPP_DestroyStream.
-  void StreamDone(NPStream* stream, NPReason reason);
-
-  // CAlled by the implementation of NPP_URLNotify.
-  void UrlNotify(const char* url, NPReason reason);
-
-  // Get the requested image encoder class ID used for encoding from the given
-  // |format| the result will be set to |pClsid|.
-  // http://msdn.microsoft.com/en-us/library/ms533843(VS.85).aspx
-  int GetEncoderClsid(const TCHAR* format, CLSID* pClsid);
-
-  // Depending on the operating system, the supported images differ.
-  // - Windows Vista / 7 supports JPG / BMP.
-  // - Others supports just BMP.
-  bool IsJPEGSupported();
+ protected:
+  bool StartImageDownload(NPString image_url) const;
+  NPP npp() const { return npp_; }
 
  private:
   NPP npp_;
-  NPObject* scriptable_object_;
-  ULONG_PTR gdiplus_token_;
-  bool debug_;
-  int style_;
-  bool supports_jpeg_wallpaper_;
+  NPObject* scripting_bridge_;
+  bool is_debug_;
 };
 
-}  // namespace desktop_service
+} // namespace set_wallpaper_extension
 
-#endif  // DESKTOP_SERVICE_H_
+#endif // DESKTOP_SERVICE_H_

@@ -4,16 +4,16 @@
 
 #include "scripting_bridge.h"
 
-#include "desktop_service.h"
+#include "win_desktop_service.h"
 
 namespace set_wallpaper_extension {
 
-ScriptingBridge::ScriptingBridge(NPP npp) : npp_(npp) {
-  id_system_color_ = NPN_GetStringIdentifier("systemColor");
-  id_style_ = NPN_GetStringIdentifier("wallpaperStyle");
-  id_wallaper_ = NPN_GetStringIdentifier("setWallpaper");
-  id_debug_ = NPN_GetStringIdentifier("debug");
-
+ScriptingBridge::ScriptingBridge(NPP npp)
+    : npp_(npp),
+      id_system_color_(NPN_GetStringIdentifier("systemColor")),
+      id_style_(NPN_GetStringIdentifier("wallpaperStyle")),
+      id_wallaper_(NPN_GetStringIdentifier("setWallpaper")),
+      id_debug_(NPN_GetStringIdentifier("debug")) {
   method_table_.insert(MethodMap::value_type(id_system_color_, &ScriptingBridge::GetSystemColor));
   method_table_.insert(MethodMap::value_type(id_style_, &ScriptingBridge::GetWallpaperStyle));
   method_table_.insert(MethodMap::value_type(id_wallaper_, &ScriptingBridge::SetWallpaper));
@@ -215,23 +215,25 @@ bool ScriptingBridge::SetWallpaper(const NPVariant* args,
 
 bool ScriptingBridge::GetDebug(NPVariant* value) {
   DesktopService* desktop_service = static_cast<DesktopService*>(npp_->pdata);
-  if (desktop_service) {
-    BOOLEAN_TO_NPVARIANT(desktop_service->debug(), *value);
-    return true;
+  if (NULL == desktop_service) {
+    VOID_TO_NPVARIANT(*value);
+    return false;
   }
-  VOID_TO_NPVARIANT(*value);
-  return false;
+  BOOLEAN_TO_NPVARIANT(desktop_service->is_debug(), *value);
+  return true;
 }
 
 bool ScriptingBridge::SetDebug(const NPVariant* value) {
   DesktopService* desktop_service = static_cast<DesktopService*>(npp_->pdata);
-  if (!desktop_service)
+  if (NULL == desktop_service) {
     return false;
+  }
 
-  if (value->type != NPVariantType_Bool)
+  if (NPVariantType_Bool != value->type) {
     return false;
+  }
 
-  desktop_service->set_debug(NPVARIANT_TO_BOOLEAN(*value));
+  desktop_service->set_is_debug(NPVARIANT_TO_BOOLEAN(*value));
   return true;
 }
 
