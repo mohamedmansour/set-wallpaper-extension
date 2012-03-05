@@ -13,7 +13,7 @@ function onLoad() {
   onRestore();
   $('button-close').addEventListener('click', onClose, false);
   $('release-notes').addEventListener('click', onReleaseNotes, false);
-  approvalOptions.init();
+  // DISABLE FOR NOW approvalOptions.init();
 }
 
 /**
@@ -38,7 +38,7 @@ function onRestore() {
   $('version').innerHTML = ' (v' + bkg.settings.version + ')';
   
   // Load Approval Options UI.
-  approvalOptions.bindUI();
+  // DISABLE FOR NOW approvalOptions.bindUI();
   
   // Debug
   var debugElement = $('debug');

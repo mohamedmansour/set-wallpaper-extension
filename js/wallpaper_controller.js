@@ -27,7 +27,7 @@ WallpaperController.prototype.init = function() {
   this.contextMenuController.init();
   this.pluginService.init();
   this.localService.init();
-  this.externalService.init();
+  // DISABLE FOR NOW this.externalService.init();
 };
 
 /**
